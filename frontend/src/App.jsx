@@ -10,10 +10,19 @@ import Orders from './components/Orders';
 import Customers from './components/Customers';
 import Tables from './components/Tables';
 import Kitchen from './components/Kitchen';
-import Admin from './components/Admin';
+
 import Reports from './components/Reports';
 import SessionManager from './components/SessionManager';
 import AccessDenied from './components/AccessDenied';
+
+// New Admin Dashboard Components
+import AdminLayout from './components/admin/AdminLayout';
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminProducts from './pages/admin/Products';
+import AdminCategories from './pages/admin/Categories';
+import AdminTables from './pages/admin/Tables';
+import AdminEmployees from './pages/admin/Employees';
+import AdminReports from './pages/admin/Reports';
 
 // Hooks
 import useAuth from './hooks/useAuth';
@@ -135,13 +144,19 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute allowedRoles={[constants.ROLES.ADMIN]}>
-              <Layout>
-                <Admin />
-              </Layout>
-            </ProtectedRoute>
+            <AdminLayout />
           }
-        />
+        >
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="categories" element={<AdminCategories />} />
+          <Route path="tables" element={<AdminTables />} />
+          <Route path="employees" element={<AdminEmployees />} />
+          <Route path="reports" element={<AdminReports />} />
+          {/* Catch-all for undefined admin routes */}
+          <Route path="*" element={<div className="p-8 text-white">Under Construction</div>} />
+        </Route>
 
         <Route
           path="/reports"
