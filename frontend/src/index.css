@@ -279,6 +279,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  position: relative;
 }
 
 .sidebar-brand {
@@ -897,4 +898,47 @@ h1, h2, h3, h4, h5, h6 {
 
 @keyframes auth-spin {
   to { transform: rotate(360deg); }
+}
+
+/* Hamburger Dropdown */
+.hamburger-dropdown {
+  position: absolute;
+  top: 60px;
+  left: 200px;
+  width: 240px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  padding: 8px;
+  animation: slideUp 0.2s ease;
+}
+
+.hamburger-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: var(--transition-fast);
+}
+
+.hamburger-item:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--primary);
+}
+
+.sidebar {
+  position: relative;
+}
+
+/* Admin subtab buttons wrapping */
+@media (max-width: 900px) {
+  .admin-tabs {
+    flex-wrap: wrap;
+  }
 }

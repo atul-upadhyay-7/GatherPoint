@@ -9,4 +9,5 @@ import java.util.List;
 public interface RestaurantTableRepo extends JpaRepository<RestaurantTable, Long> {
     List<RestaurantTable> findByFloorId(Long floorId);
     List<RestaurantTable> findByActiveTrue();
+    List<RestaurantTable> findByFloorIdAndActiveTrue(Long floorId);
 }

@@ -2,7 +2,9 @@ package com.GatherPoint.backend.controller;
 
 import com.GatherPoint.backend.Constants.TicketStage;
 import com.GatherPoint.backend.Model.KitchenTicket;
+import com.GatherPoint.backend.Model.KitchenTicketItem;
 import com.GatherPoint.backend.Repo.KitchenTicketRepo;
+import com.GatherPoint.backend.Repo.KitchenTicketItemRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,8 @@ import java.util.Optional;
 public class KitchenController {
 
     private final KitchenTicketRepo kitchenTicketRepo;
+
+    private final KitchenTicketItemRepo kitchenTicketItemRepo;
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -58,5 +62,26 @@ public class KitchenController {
                 "ticket", saved
         ));
         return ResponseEntity.ok(saved);
+    }
+
+    @PatchMapping("/orders/{ticketId}/items/{itemId}/complete")
+    public ResponseEntity<?> completeItem(@PathVariable Long ticketId, @PathVariable Long itemId) {
+        Optional<KitchenTicket> ticketOpt = kitchenTicketRepo.findById(ticketId);
+        if (ticketOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        Optional<KitchenTicketItem> itemOpt = kitchenTicketItemRepo.findById(itemId);
+        if (itemOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        KitchenTicketItem item = itemOpt.get();
+        item.setCompleted(true);
+        kitchenTicketItemRepo.save(item);
+
+        messagingTemplate.convertAndSend("/topic/kitchen", (Object) Map.of(
+                "event", "ITEM_COMPLETED",
+                "ticketId", ticketId,
+                "itemId", itemId
+        ));
+
+        return ResponseEntity.ok(Map.of("success", true, "item", item));
     }
 }

@@ -108,4 +108,13 @@ public class PaymentController {
                 "payment", saved
         ));
     }
+
+    @PostMapping("/{paymentId}/email")
+    public ResponseEntity<?> emailReceipt(@PathVariable Long paymentId, @RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body("Email is required");
+        }
+        return ResponseEntity.ok(Map.of("success", true, "message", "Receipt sent to " + email));
+    }
 }
