@@ -1,86 +1,69 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { ShoppingBag, Minus, Plus, Trash2, X } from 'lucide-react';
+import { ShoppingBag, X, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
 
 const FloatingCart = ({ cart, updateQuantity, removeItem, onCheckout }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const cartRef = useRef(null);
-  const badgeRef = useRef(null);
+  const drawerRef = useRef(null);
+  const overlayRef = useRef(null);
   
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const tax = subtotal * 0.05;
-  const total = subtotal + tax;
-  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Animate badge on count change
   useEffect(() => {
-    if (itemCount > 0 && badgeRef.current) {
-      gsap.fromTo(badgeRef.current,
-        { scale: 1.5 },
-        { scale: 1, duration: 0.3, ease: "back.out(2)" }
-      );
-    }
-  }, [itemCount]);
-
-  // Open/Close animation
-  useEffect(() => {
-    if (!cartRef.current) return;
     if (isOpen) {
-      gsap.to(cartRef.current, { x: 0, y: 0, duration: 0.4, ease: "power3.out" });
+      gsap.to(overlayRef.current, { opacity: 1, duration: 0.3, display: 'block' });
+      gsap.to(drawerRef.current, { x: 0, duration: 0.5, ease: "power3.out" });
     } else {
-      // Mobile vs Desktop closing position
-      const isMobile = window.innerWidth < 1024;
-      gsap.to(cartRef.current, { 
-        x: isMobile ? 0 : '100%', 
-        y: isMobile ? '100%' : 0, 
-        duration: 0.4, 
-        ease: "power3.in" 
-      });
+      gsap.to(drawerRef.current, { x: '100%', duration: 0.4, ease: "power3.in" });
+      gsap.to(overlayRef.current, { opacity: 0, duration: 0.3, display: 'none', delay: 0.1 });
     }
   }, [isOpen]);
 
   return (
     <>
-      {/* Floating Toggle Button (visible when closed) */}
-      {!isOpen && (
+      {/* Top Right Floating Button */}
+      <div className="fixed top-6 right-6 z-50">
         <button 
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 lg:bottom-10 lg:right-10 z-50 w-16 h-16 bg-customer-accent rounded-full flex items-center justify-center text-customer-bg shadow-[0_0_20px_rgba(212,163,115,0.4)] hover:scale-110 transition-transform"
+          className="relative bg-customer-primary text-customer-text p-4 rounded-full shadow-[0_0_20px_rgba(45,106,79,0.4)] hover:bg-customer-accent hover:text-customer-bg hover:shadow-[0_0_25px_rgba(212,163,115,0.5)] transition-all duration-300 group"
         >
-          <ShoppingBag size={28} />
-          {itemCount > 0 && (
-            <div ref={badgeRef} className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-md">
-              {itemCount}
-            </div>
+          <ShoppingBag size={24} className="group-hover:scale-110 transition-transform" />
+          {totalItems > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full border-2 border-customer-bg">
+              {totalItems}
+            </span>
           )}
         </button>
-      )}
+      </div>
 
-      {/* Overlay for mobile */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* Cart Container */}
+      {/* Drawer Overlay */}
       <div 
-        ref={cartRef}
-        className="fixed bottom-0 left-0 right-0 h-[80vh] lg:top-0 lg:bottom-auto lg:left-auto lg:right-0 lg:h-screen lg:w-96 bg-customer-bg border-t lg:border-t-0 lg:border-l border-white/10 z-50 flex flex-col shadow-2xl translate-y-full lg:translate-y-0 lg:translate-x-full"
+        ref={overlayRef} 
+        onClick={() => setIsOpen(false)}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden opacity-0"
+      />
+
+      {/* Slide-out Drawer */}
+      <div 
+        ref={drawerRef}
+        className="fixed top-0 right-0 h-full w-full max-w-md bg-customer-bg border-l border-white/10 z-[70] shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col transform translate-x-full"
       >
-        <div className="p-6 border-b border-white/10 flex justify-between items-center bg-customer-primary/20">
-          <h2 className="text-2xl font-cinzel font-bold text-customer-accent flex items-center gap-2">
-            <ShoppingBag /> Your Order
+        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
+          <h2 className="text-2xl font-cinzel font-bold text-customer-accent flex items-center gap-3">
+            <ShoppingBag size={26} />
+            Your Order
           </h2>
-          <button onClick={() => setIsOpen(false)} className="text-customer-text/70 hover:text-customer-accent transition-colors">
-            <X size={28} />
+          <button 
+            onClick={() => setIsOpen(false)}
+            className="p-2 rounded-full hover:bg-white/10 text-customer-text/70 hover:text-customer-accent transition-colors"
+          >
+            <X size={24} />
           </button>
         </div>
 
-        <div className="flex-grow overflow-y-auto p-6 space-y-6">
+        <div className="flex-grow overflow-y-auto p-6 no-scrollbar space-y-4">
           {cart.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-customer-text/50">
             <div className="h-full flex flex-col items-center justify-center text-customer-text/50">
               <ShoppingBag size={64} className="mb-4 opacity-20" />
               <p className="text-lg font-sans">Your cart is empty.</p>
@@ -122,14 +105,27 @@ const FloatingCart = ({ cart, updateQuantity, removeItem, onCheckout }) => {
         </div>
 
         {cart.length > 0 && (
-              </div>
+          <div className="p-6 bg-white/5 border-t border-white/10">
+            <div className="flex justify-between mb-2 text-customer-text/70">
+              <span>Subtotal</span>
+              <span className="font-sans">₹{subtotal.toFixed(2)}</span>
             </div>
-            
+            <div className="flex justify-between mb-4 text-customer-text/70">
+              <span>Taxes (5%)</span>
+              <span className="font-sans">₹{(subtotal * 0.05).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between mb-6 text-xl font-bold border-t border-white/10 pt-4">
+              <span>Total</span>
+              <span className="text-customer-accent font-sans">₹{(subtotal * 1.05).toFixed(2)}</span>
+            </div>
             <button 
-              onClick={() => { setIsOpen(false); onCheckout(); }}
-              className="w-full py-4 bg-customer-primary text-customer-text font-bold rounded-xl hover:bg-customer-accent hover:text-customer-bg transition-colors shadow-lg shadow-customer-primary/20"
+              onClick={() => {
+                setIsOpen(false);
+                onCheckout();
+              }}
+              className="w-full py-4 bg-customer-primary text-customer-text font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-customer-accent hover:text-customer-bg transition-colors shadow-[0_4px_15px_rgba(45,106,79,0.5)]"
             >
-              Proceed to Checkout
+              Proceed to Checkout <ArrowRight size={20} />
             </button>
           </div>
         )}
