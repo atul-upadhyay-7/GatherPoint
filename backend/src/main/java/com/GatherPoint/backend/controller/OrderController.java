@@ -1,6 +1,7 @@
 package com.GatherPoint.backend.controller;
 
 import com.GatherPoint.backend.Constants.OrderStatus;
+import com.GatherPoint.backend.Constants.TicketStage;
 import com.GatherPoint.backend.Model.*;
 import com.GatherPoint.backend.Repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,7 +168,7 @@ public class OrderController {
         KitchenTicket ticket = KitchenTicket.builder()
                 .order(order)
                 .orderNumber(order.getOrderNumber())
-                .stage("TO_COOK")
+                .stage(TicketStage.TO_COOK)
                 .createdAt(LocalDateTime.now())
                 .items(new ArrayList<>())
                 .build();

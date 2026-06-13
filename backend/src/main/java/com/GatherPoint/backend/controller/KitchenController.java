@@ -1,5 +1,6 @@
 package com.GatherPoint.backend.controller;
 
+import com.GatherPoint.backend.Constants.TicketStage;
 import com.GatherPoint.backend.Model.KitchenTicket;
 import com.GatherPoint.backend.Repo.KitchenTicketRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class KitchenController {
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
         KitchenTicket ticket = opt.get();
-        ticket.setStage("PREPARING");
+        ticket.setStage(TicketStage.PREPARING);
         KitchenTicket saved = kitchenTicketRepo.save(ticket);
 
         // Broadcast to KDS / POS via WebSocket
@@ -50,7 +51,7 @@ public class KitchenController {
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
         KitchenTicket ticket = opt.get();
-        ticket.setStage("COMPLETED");
+        ticket.setStage(TicketStage.COMPLETED);
         KitchenTicket saved = kitchenTicketRepo.save(ticket);
 
         // Broadcast to KDS / POS via WebSocket
