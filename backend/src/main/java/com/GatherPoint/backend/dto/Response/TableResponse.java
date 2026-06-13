@@ -7,7 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class TableResponse {
     private Long id;
-    private Integer tableNumber;
+    private String tableNumber;
     private Integer seats;
     private boolean active;
     private Long floorId;

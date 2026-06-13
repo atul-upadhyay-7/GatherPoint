@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class TableRequest {
-    private Integer tableNumber;
+    private String tableNumber;
     private Integer seats;
     private Boolean active;
     private Long floorId;
