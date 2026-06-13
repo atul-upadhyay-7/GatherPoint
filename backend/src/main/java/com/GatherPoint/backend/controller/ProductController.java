@@ -4,6 +4,7 @@ import com.GatherPoint.backend.Model.Category;
 import com.GatherPoint.backend.Model.Product;
 import com.GatherPoint.backend.Repo.CategoryRepo;
 import com.GatherPoint.backend.Repo.ProductRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,15 +15,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class ProductController {
 
-    @Autowired
-    private ProductRepo productRepo;
-
-    @Autowired
-    private CategoryRepo categoryRepo;
-
-    // --- CATEGORY MODULE ---
+    private final ProductRepo productRepo;
+    private final CategoryRepo categoryRepo;
     
     @GetMapping("/categories")
     public List<Category> getAllCategories() {
@@ -53,8 +50,6 @@ public class ProductController {
         categoryRepo.deleteById(id);
         return ResponseEntity.ok("Category deleted successfully");
     }
-
-    // --- PRODUCT MODULE ---
 
     @GetMapping("/products")
     public List<Product> getAllProducts() {

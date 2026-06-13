@@ -1,4 +1,4 @@
-package com.GatherPoint.backend.dto;
+package com.GatherPoint.backend.dto.Request;
 
 import com.GatherPoint.backend.Constants.Role;
 import lombok.Data;

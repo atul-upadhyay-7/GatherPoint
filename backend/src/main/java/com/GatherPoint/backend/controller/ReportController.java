@@ -4,6 +4,7 @@ import com.GatherPoint.backend.Constants.OrderStatus;
 import com.GatherPoint.backend.Model.Order;
 import com.GatherPoint.backend.Model.OrderItem;
 import com.GatherPoint.backend.Repo.OrderRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -18,10 +19,10 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/reports")
+@RequiredArgsConstructor
 public class ReportController {
 
-    @Autowired
-    private OrderRepo orderRepo;
+    private final OrderRepo orderRepo;
 
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboardStats() {

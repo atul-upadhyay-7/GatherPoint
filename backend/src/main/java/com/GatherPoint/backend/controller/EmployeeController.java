@@ -2,6 +2,7 @@ package com.GatherPoint.backend.controller;
 
 import com.GatherPoint.backend.Model.User;
 import com.GatherPoint.backend.Repo.UserRepo;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,13 +14,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/employees")
+@AllArgsConstructor
 public class EmployeeController {
 
-    @Autowired
-    private UserRepo userRepo;
+    private final UserRepo userRepo;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping
     public List<User> getAllEmployees() {

@@ -4,6 +4,7 @@ import com.GatherPoint.backend.Constants.OrderStatus;
 import com.GatherPoint.backend.Constants.TicketStage;
 import com.GatherPoint.backend.Model.*;
 import com.GatherPoint.backend.Repo.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,28 +21,16 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/orders")
+@RequiredArgsConstructor
 public class OrderController {
 
-    @Autowired
-    private OrderRepo orderRepo;
-
-    @Autowired
-    private ProductRepo productRepo;
-
-    @Autowired
-    private CustomerRepo customerRepo;
-
-    @Autowired
-    private RestaurantTableRepo tableRepo;
-
-    @Autowired
-    private UserRepo userRepo;
-
-    @Autowired
-    private KitchenTicketRepo kitchenTicketRepo;
-
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+    private final OrderRepo orderRepo;
+    private final ProductRepo productRepo;
+    private final CustomerRepo customerRepo;
+    private final RestaurantTableRepo tableRepo;
+    private final UserRepo userRepo;
+    private final KitchenTicketRepo kitchenTicketRepo;
+    private final SimpMessagingTemplate messagingTemplate;
 
     private User getLoggedInUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();

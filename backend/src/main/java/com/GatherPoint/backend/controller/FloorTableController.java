@@ -4,6 +4,7 @@ import com.GatherPoint.backend.Model.Floor;
 import com.GatherPoint.backend.Model.RestaurantTable;
 import com.GatherPoint.backend.Repo.FloorRepo;
 import com.GatherPoint.backend.Repo.RestaurantTableRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,15 +15,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class FloorTableController {
 
-    @Autowired
-    private FloorRepo floorRepo;
+    private final FloorRepo floorRepo;
 
-    @Autowired
-    private RestaurantTableRepo tableRepo;
-
-    // --- FLOOR MODULE ---
+    private final RestaurantTableRepo tableRepo;
 
     @GetMapping("/floors")
     public List<Floor> getAllFloors() {
@@ -52,8 +50,6 @@ public class FloorTableController {
         floorRepo.deleteById(id);
         return ResponseEntity.ok("Floor deleted successfully");
     }
-
-    // --- TABLE MODULE ---
 
     @GetMapping("/tables")
     public List<RestaurantTable> getAllTables() {

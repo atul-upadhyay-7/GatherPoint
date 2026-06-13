@@ -2,6 +2,7 @@ package com.GatherPoint.backend.controller;
 
 import com.GatherPoint.backend.Model.Customer;
 import com.GatherPoint.backend.Repo.CustomerRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +13,10 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/customers")
+@RequiredArgsConstructor
 public class CustomerController {
 
-    @Autowired
-    private CustomerRepo customerRepo;
+    private final CustomerRepo customerRepo;
 
     @GetMapping
     public List<Customer> getAllCustomers() {

@@ -5,6 +5,7 @@ import com.GatherPoint.backend.Model.Order;
 import com.GatherPoint.backend.Model.Payment;
 import com.GatherPoint.backend.Repo.OrderRepo;
 import com.GatherPoint.backend.Repo.PaymentRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +17,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/payments")
+@RequiredArgsConstructor
 public class PaymentController {
 
-    @Autowired
-    private OrderRepo orderRepo;
-
-    @Autowired
-    private PaymentRepo paymentRepo;
+    private final OrderRepo orderRepo;
+    private final PaymentRepo paymentRepo;
 
     @PostMapping("/cash")
     public ResponseEntity<?> payCash(@RequestBody Map<String, Object> payload) {

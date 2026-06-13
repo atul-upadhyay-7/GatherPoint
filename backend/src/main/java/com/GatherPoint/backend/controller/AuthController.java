@@ -3,11 +3,11 @@ package com.GatherPoint.backend.controller;
 import com.GatherPoint.backend.Model.User;
 import com.GatherPoint.backend.Repo.UserRepo;
 import com.GatherPoint.backend.Security.JwtUtil;
-import com.GatherPoint.backend.dto.AuthResponse;
-import com.GatherPoint.backend.dto.LoginRequest;
-import com.GatherPoint.backend.dto.RefreshTokenRequest;
-import com.GatherPoint.backend.dto.SignupRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.GatherPoint.backend.dto.Request.LoginRequest;
+import com.GatherPoint.backend.dto.Request.RefreshTokenRequest;
+import com.GatherPoint.backend.dto.Request.SignupRequest;
+import com.GatherPoint.backend.dto.Response.AuthResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,16 +17,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private UserRepo userRepo;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final UserRepo userRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
@@ -77,7 +73,7 @@ public class AuthController {
                 user.getEmail(),
                 user.getRole(),
                 user.isActive()
-                ));
+        ));
     }
 
     @PostMapping("/refresh")

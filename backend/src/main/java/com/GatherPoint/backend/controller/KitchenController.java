@@ -3,6 +3,7 @@ package com.GatherPoint.backend.controller;
 import com.GatherPoint.backend.Constants.TicketStage;
 import com.GatherPoint.backend.Model.KitchenTicket;
 import com.GatherPoint.backend.Repo.KitchenTicketRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -14,13 +15,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/kitchen")
+@RequiredArgsConstructor
 public class KitchenController {
 
-    @Autowired
-    private KitchenTicketRepo kitchenTicketRepo;
+    private final KitchenTicketRepo kitchenTicketRepo;
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/orders")
     public List<KitchenTicket> getKitchenTickets() {
@@ -41,7 +41,6 @@ public class KitchenController {
                 "event", "ORDER_PREPARING",
                 "ticket", saved
         ));
-
         return ResponseEntity.ok(saved);
     }
 
@@ -54,12 +53,10 @@ public class KitchenController {
         ticket.setStage(TicketStage.COMPLETED);
         KitchenTicket saved = kitchenTicketRepo.save(ticket);
 
-        // Broadcast to KDS / POS via WebSocket
         messagingTemplate.convertAndSend("/topic/kitchen", (Object) Map.of(
                 "event", "ORDER_COMPLETED",
                 "ticket", saved
         ));
-
         return ResponseEntity.ok(saved);
     }
 }

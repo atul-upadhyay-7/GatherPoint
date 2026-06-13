@@ -4,6 +4,7 @@ import com.GatherPoint.backend.Model.Coupon;
 import com.GatherPoint.backend.Model.Promotion;
 import com.GatherPoint.backend.Repo.CouponRepo;
 import com.GatherPoint.backend.Repo.PromotionRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,15 +15,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class CouponPromotionController {
 
-    @Autowired
-    private CouponRepo couponRepo;
+    private final CouponRepo couponRepo;
 
-    @Autowired
-    private PromotionRepo promotionRepo;
-
-    // --- COUPON MODULE ---
+    private final PromotionRepo promotionRepo;
 
     @GetMapping("/coupons")
     public List<Coupon> getAllCoupons() {
@@ -56,8 +54,6 @@ public class CouponPromotionController {
         couponRepo.deleteById(id);
         return ResponseEntity.ok("Coupon deleted successfully");
     }
-
-    // --- PROMOTION MODULE ---
 
     @GetMapping("/promotions")
     public List<Promotion> getAllPromotions() {

@@ -4,6 +4,7 @@ import com.GatherPoint.backend.Model.PosSession;
 import com.GatherPoint.backend.Model.User;
 import com.GatherPoint.backend.Repo.PosSessionRepo;
 import com.GatherPoint.backend.Repo.UserRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +19,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/session")
+@RequiredArgsConstructor
 public class SessionController {
 
-    @Autowired
-    private PosSessionRepo sessionRepo;
-
-    @Autowired
-    private UserRepo userRepo;
+    private final PosSessionRepo sessionRepo;
+    private final UserRepo userRepo;
 
     private User getLoggedInUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
