@@ -136,9 +136,9 @@ const CustomerOrder = () => {
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => menuRef.current?.scrollIntoView({ behavior: 'smooth' })}
-              className="hidden sm:flex items-center gap-2 px-7 py-3.5 rounded-full border border-customer-accent/50 text-customer-accent text-base font-semibold hover:bg-customer-accent hover:text-customer-bg transition-all duration-200"
+              className="hidden sm:flex items-center gap-2.5 px-9 py-4 rounded-full border border-customer-accent/50 text-customer-accent text-lg font-bold hover:bg-customer-accent hover:text-customer-bg transition-all duration-200"
             >
-              Browse Menu <ChevronDown size={18} />
+              Browse Menu <ChevronDown size={22} />
             </motion.button>
 
             {/* Cart */}
@@ -146,9 +146,9 @@ const CustomerOrder = () => {
               whileHover={{ scale: 1.06 }}
               whileTap={{ scale: 0.94 }}
               onClick={() => document.getElementById('cart-trigger-btn')?.click()}
-              className="relative flex items-center gap-2 px-7 py-3.5 rounded-full bg-customer-primary text-customer-text font-bold text-base hover:bg-customer-accent hover:text-customer-bg transition-colors duration-200 shadow-[0_0_18px_rgba(45,106,79,0.35)]"
+              className="relative flex items-center gap-2.5 px-9 py-4 rounded-full bg-customer-primary text-customer-text font-black text-lg hover:bg-customer-accent hover:text-customer-bg transition-colors duration-200 shadow-[0_0_22px_rgba(45,106,79,0.4)]"
             >
-              <ShoppingBag size={20} />
+              <ShoppingBag size={22} />
               <span className="hidden sm:inline">Cart</span>
               <AnimatePresence>
                 {totalItems > 0 && (
@@ -157,7 +157,7 @@ const CustomerOrder = () => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
-                    className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-customer-bg"
+                    className="absolute -top-1 -right-1 bg-red-500 text-white text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-customer-bg"
                   >
                     {totalItems}
                   </motion.span>
