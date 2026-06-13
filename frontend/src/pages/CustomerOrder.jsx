@@ -114,7 +114,7 @@ const CustomerOrder = () => {
     <div className="bg-customer-bg min-h-screen text-customer-text font-sans selection:bg-customer-accent selection:text-customer-bg">
       <HeroSection onBrowseClick={handleBrowseClick} />
       
-      <div ref={menuRef} className="w-full max-w-[1600px] mx-auto px-6 lg:px-12 pb-32">
+      <div ref={menuRef} className="w-full max-w-7xl mx-auto px-8 lg:px-12 pb-32">
         <CategoryTabs 
           selectedCategory={selectedCategory} 
           onSelectCategory={setSelectedCategory} 
