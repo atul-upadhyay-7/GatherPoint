@@ -6,6 +6,8 @@ import com.GatherPoint.backend.Repo.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -25,6 +27,7 @@ public class PublicController {
     private final CustomerRepo customerRepo;
     private final OrderRepo orderRepo;
     private final FloorRepo floorRepo;
+    private final JwtDecoder jwtDecoder;
 
     @GetMapping("/categories")
     public List<Category> getCategories() {
@@ -88,6 +91,52 @@ public class PublicController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
         }
         return ResponseEntity.ok(customer);
+    }
+
+    @PostMapping("/auth/clerk-login")
+    public ResponseEntity<?> loginWithClerk(@RequestBody java.util.Map<String, String> body, jakarta.servlet.http.HttpSession session) {
+        String token = body.get("token");
+        if (token == null || token.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Token is required");
+        }
+        try {
+            Jwt jwt = jwtDecoder.decode(token);
+            String clerkUserId = jwt.getClaimAsString("sub");
+            if (clerkUserId == null) {
+                return ResponseEntity.badRequest().body("Invalid token claims");
+            }
+
+            String email = body.get("email");
+            String name = body.get("name");
+            String phone = body.get("phone");
+
+            if (email == null || email.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Email is required");
+            }
+
+            Optional<Customer> customerOpt = customerRepo.findByEmail(email);
+            Customer customer;
+            if (customerOpt.isPresent()) {
+                customer = customerOpt.get();
+                if ((customer.getName() == null || customer.getName().isEmpty()) && name != null) {
+                    customer.setName(name);
+                }
+                if ((customer.getPhone() == null || customer.getPhone().isEmpty()) && phone != null) {
+                    customer.setPhone(phone);
+                }
+                customer = customerRepo.save(customer);
+            } else {
+                customer = new Customer();
+                customer.setEmail(email);
+                customer.setName(name != null ? name : "Clerk Customer");
+                customer.setPhone(phone != null ? phone : "");
+                customer = customerRepo.save(customer);
+            }
+            session.setAttribute("customer", customer);
+            return ResponseEntity.ok(customer);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token: " + e.getMessage());
+        }
     }
 
     @PostMapping("/orders")

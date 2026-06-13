@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import Logo from './customer/Logo';
 
@@ -28,14 +28,14 @@ export default function Layout({ children }) {
         <nav className="flex-1 p-4 space-y-2">
           {navigation.map((item) => (
             !item.admin || user?.role === 'ADMIN' ? (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
+                to={item.href}
                 className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
               >
                 <span className="text-xl">{item.icon}</span>
                 <span className="font-medium">{item.name}</span>
-              </a>
+              </Link>
             ) : null
           ))}
         </nav>

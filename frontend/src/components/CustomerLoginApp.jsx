@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSignIn, useAuth, useUser } from '@clerk/clerk-react';
 
 const API_BASE_URL = 'http://localhost:8080/api/public';
 
@@ -140,12 +141,48 @@ const styles = {
 };
 
 export default function CustomerLoginApp() {
+  const { signIn, isLoaded: signInLoaded } = useSignIn();
+  const { isLoaded: authLoaded, isSignedIn, getToken } = useAuth();
+  const { user: clerkUser, isLoaded: userLoaded } = useUser();
+
   const [activeTab, setActiveTab] = useState('login');
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [signupForm, setSignupForm] = useState({ name: '', email: '', password: '', phone: '' });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const loginWithClerkToken = async () => {
+      if (authLoaded && isSignedIn && userLoaded && clerkUser) {
+        setLoading(true);
+        try {
+          const token = await getToken();
+          const email = clerkUser.primaryEmailAddress?.emailAddress || '';
+          const name = clerkUser.fullName || clerkUser.firstName || 'Clerk Customer';
+          const phone = clerkUser.primaryPhoneNumber?.phoneNumber || '';
+
+          const res = await fetch(`${API_BASE_URL}/auth/clerk-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, email, name, phone }),
+          });
+          if (res.ok) {
+            const userData = await res.json();
+            setUser(userData);
+          } else {
+            const err = await res.text();
+            setMessage(err || 'Failed to authenticate via Google');
+          }
+        } catch (e) {
+          setMessage('Error connecting to authentication server');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    loginWithClerkToken();
+  }, [authLoaded, isSignedIn, userLoaded, clerkUser, getToken]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -205,8 +242,17 @@ export default function CustomerLoginApp() {
     setLoading(false);
   };
 
-  const handleGoogleAuth = () => {
-    window.location.href = `${API_BASE_URL}/auth/google`;
+  const handleGoogleAuth = async () => {
+    if (!signInLoaded) return;
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: window.location.href,
+        redirectUrlComplete: window.location.href,
+      });
+    } catch (err) {
+      setMessage(err.message || 'Google Auth failed');
+    }
   };
 
   if (user) {

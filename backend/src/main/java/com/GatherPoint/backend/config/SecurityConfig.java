@@ -1,6 +1,7 @@
 package com.GatherPoint.backend.config;
 
 import com.GatherPoint.backend.Security.JwtFilter;
+import com.GatherPoint.backend.Security.ClerkAuthenticationConverter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +27,7 @@ import java.util.Collections;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final ClerkAuthenticationConverter clerkAuthenticationConverter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -39,6 +41,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt
+                    .jwtAuthenticationConverter(clerkAuthenticationConverter)
+                )
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

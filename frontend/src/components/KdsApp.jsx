@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
 import { Search, Clock, CheckCircle, ChevronRight } from 'lucide-react';
 
 const API_BASE = 'http://localhost:8080/api';
 
 function KdsApp() {
-  const { getToken, isSignedIn, isLoaded } = useAuth();
+  const navigate = useNavigate();
+  const { user, token: localToken, loading: authLoading } = useAuth();
   const [tickets, setTickets] = useState([]);
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState('ALL');
@@ -48,26 +50,14 @@ function KdsApp() {
     } catch (e) { console.debug('KDS: tickets fetch failed', e); }
   }, [token]);
 
-  // Handle token load
+  // Handle token load from local auth
   useEffect(() => {
-    let active = true;
-    const loadToken = async () => {
-      if (isLoaded && isSignedIn) {
-        try {
-          const t = await getToken();
-          if (active && t) {
-            setToken(t);
-          }
-        } catch (err) {
-          console.debug('Failed to load token', err);
-        }
-      }
-    };
-    loadToken();
-    return () => {
-      active = false;
-    };
-  }, [isLoaded, isSignedIn, getToken]);
+    if (!authLoading && localToken) {
+      setToken(localToken);
+    } else if (!authLoading && !localToken) {
+      setToken(null);
+    }
+  }, [authLoading, localToken]);
 
   useEffect(() => {
     if (token) {
@@ -162,7 +152,7 @@ function KdsApp() {
     return `${Math.floor(mins / 60)}h ${mins % 60}m ago`;
   };
 
-  if (!isLoaded) {
+  if (authLoading) {
     return (
       <div className="kds-bg" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <p style={{ color: 'var(--text-secondary)' }}>Loading KDS...</p>
@@ -170,14 +160,14 @@ function KdsApp() {
     );
   }
 
-  if (!isSignedIn) {
+  if (!user) {
     return (
       <div className="kds-bg" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '20px' }}>
         <h1 style={{ color: 'var(--primary)', fontFamily: 'var(--font-display)' }}>GatherPoint KDS</h1>
         <p style={{ color: 'var(--text-secondary)' }}>Please sign in to access the Kitchen Display.</p>
         <button 
           className="btn btn-primary"
-          onClick={() => window.location.href = '/'}
+          onClick={() => navigate('/staff-pos')}
           style={{ padding: '12px 24px' }}
         >
           Go to Login

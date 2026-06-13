@@ -1,11 +1,6 @@
 
+import KdsApp from './KdsApp';
+
 export default function Kitchen() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Kitchen Display</h1>
-      <div className="bg-gray-800 rounded-lg p-6">
-        <p className="text-gray-400">Kitchen display system for order preparation.</p>
-      </div>
-    </div>
-  );
+  return <KdsApp />;
 }

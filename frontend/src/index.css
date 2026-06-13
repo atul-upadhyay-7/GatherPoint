@@ -1202,3 +1202,95 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 16px !important;
 }
 
+/* ─── Clerk Staff Login Theme Overrides ─── */
+.clerk-staff-login .cl-rootBox {
+  width: 100%;
+}
+.clerk-staff-login .cl-card {
+  background: rgba(8, 15, 10, 0.88) !important;
+  border: 1px solid rgba(212, 175, 55, 0.2) !important;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 60px rgba(212,175,55,0.06) !important;
+  backdrop-filter: blur(24px) !important;
+  border-radius: 16px !important;
+}
+.clerk-staff-login .cl-cardBox {
+  box-shadow: none !important;
+  border: 1px solid rgba(212, 175, 55, 0.2) !important;
+  border-radius: 16px !important;
+}
+.clerk-staff-login .cl-headerTitle {
+  color: #D4AF37 !important;
+}
+.clerk-staff-login .cl-headerSubtitle {
+  color: rgba(255,255,255,0.5) !important;
+}
+.clerk-staff-login .cl-socialButtonsBlockButton {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(212,175,55,0.2) !important;
+  color: rgba(255,255,255,0.8) !important;
+}
+.clerk-staff-login .cl-socialButtonsBlockButton:hover {
+  background: rgba(212,175,55,0.1) !important;
+}
+.clerk-staff-login .cl-socialButtonsBlockButtonText {
+  color: rgba(255,255,255,0.8) !important;
+}
+.clerk-staff-login .cl-dividerLine {
+  background: rgba(212,175,55,0.15) !important;
+}
+.clerk-staff-login .cl-dividerText {
+  color: rgba(212,175,55,0.5) !important;
+}
+.clerk-staff-login .cl-formFieldLabel {
+  color: rgba(212,175,55,0.6) !important;
+}
+.clerk-staff-login .cl-formFieldInput {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(212,175,55,0.15) !important;
+  color: #e2d5b0 !important;
+}
+.clerk-staff-login .cl-formFieldInput:focus {
+  border-color: rgba(212,175,55,0.5) !important;
+  box-shadow: 0 0 0 2px rgba(212,175,55,0.15) !important;
+}
+.clerk-staff-login .cl-formButtonPrimary {
+  background: linear-gradient(135deg, #D4AF37, #b8943f) !important;
+  color: #050505 !important;
+  font-weight: 700 !important;
+}
+.clerk-staff-login .cl-formButtonPrimary:hover {
+  box-shadow: 0 0 30px rgba(212,175,55,0.4) !important;
+}
+.clerk-staff-login .cl-footerActionLink {
+  color: #D4AF37 !important;
+}
+.clerk-staff-login .cl-footerActionLink:hover {
+  color: #FFF2B2 !important;
+}
+.clerk-staff-login .cl-footerActionText {
+  color: rgba(255,255,255,0.4) !important;
+}
+.clerk-staff-login .cl-footer {
+  background: transparent !important;
+}
+.clerk-staff-login .cl-internal-b3fm6y {
+  background: transparent !important;
+}
+.clerk-staff-login .cl-identityPreviewText {
+  color: rgba(255,255,255,0.7) !important;
+}
+.clerk-staff-login .cl-identityPreviewEditButton {
+  color: #D4AF37 !important;
+}
+.clerk-staff-login .cl-formFieldAction {
+  color: #D4AF37 !important;
+}
+.clerk-staff-login .cl-alternativeMethodsBlockButton {
+  color: #D4AF37 !important;
+  border-color: rgba(212,175,55,0.2) !important;
+}
+.clerk-staff-login .cl-otpCodeFieldInput {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(212,175,55,0.2) !important;
+  color: #e2d5b0 !important;
+}

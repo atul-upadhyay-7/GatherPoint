@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/Layout';
 import LandingPage from './components/LandingPage';
 import CustomerLoginPage from './components/CustomerLoginPage';
+import StaffPosLogin from './components/StaffPosLogin';
 import PosTerminal from './components/PosTerminal';
 import Orders from './components/Orders';
 import Customers from './components/Customers';
@@ -40,6 +41,38 @@ const queryClient = new QueryClient({
   },
 });
 
+// Helper: get the correct dashboard route for a given role
+const getDashboardRoute = (role) => {
+  switch (role) {
+    case constants.ROLES.ADMIN:
+      return '/admin';
+    case constants.ROLES.KITCHEN_STAFF:
+      return '/kitchen';
+    case constants.ROLES.EMPLOYEE:
+    default:
+      return '/pos';
+  }
+};
+
+// Redirect authenticated staff users to their role-specific dashboard
+const RoleBasedRedirect = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4AF37]"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <StaffPosLogin />;
+  }
+
+  return <Navigate to={getDashboardRoute(user.role)} replace />;
+};
+
 // Protected Route component
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
@@ -53,7 +86,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/staff-pos" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
@@ -65,15 +98,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 // Main App component
 function App() {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4AF37]"></div>
-      </div>
-    );
-  }
+  const { user } = useAuth();
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -82,6 +107,10 @@ function App() {
         <Route
           path="/login"
           element={!user ? <CustomerLoginPage /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/staff-pos/*"
+          element={<RoleBasedRedirect />}
         />
         <Route path="/" element={<LandingPage />} />
 

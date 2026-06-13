@@ -148,8 +148,8 @@ export default function LandingPage({ onEnter }) {
         <div className="hidden md:flex items-center gap-8">
           <a href="#" className="text-[#D4AF37] text-xs tracking-[0.15em] uppercase font-semibold hover:text-[#FFF2B2] transition-colors">Home</a>
           <a href="/customer-order" className="text-white/60 text-xs tracking-[0.15em] uppercase font-semibold hover:text-white transition-colors">Menu</a>
-          <a href="#" className="text-white/60 text-xs tracking-[0.15em] uppercase font-semibold hover:text-white transition-colors">Book a Table</a>
-          <button onClick={onEnter} className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#D4AF37] text-[#020403] text-xs tracking-[0.12em] font-bold uppercase hover:bg-[#FFF2B2] transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.25)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]">
+          <a href="/booking.html" className="text-white/60 text-xs tracking-[0.15em] uppercase font-semibold hover:text-white transition-colors">Book a Table</a>
+          <button onClick={() => navigate('/staff-pos')} className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#D4AF37] text-[#020403] text-xs tracking-[0.12em] font-bold uppercase hover:bg-[#FFF2B2] transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.25)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]">
             <Shield size={14} /> Staff Login
           </button>
           <button onClick={() => navigate('/customer-order')} className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#D4AF37]/40 text-[#D4AF37] text-xs tracking-[0.12em] font-bold uppercase hover:bg-[#D4AF37]/10 transition-all duration-300">
@@ -167,9 +167,9 @@ export default function LandingPage({ onEnter }) {
           <div className="absolute top-full left-0 right-0 p-6 flex flex-col gap-4" style={{ background: 'rgba(2, 4, 3, 0.95)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(207, 173, 86, 0.12)' }}>
             <a href="#" className="text-[#D4AF37] text-sm tracking-[0.15em] uppercase font-semibold">Home</a>
             <a href="/customer-order" className="text-white/60 text-sm tracking-[0.15em] uppercase font-semibold">Menu</a>
-            <a href="#" className="text-white/60 text-sm tracking-[0.15em] uppercase font-semibold">Book a Table</a>
+            <a href="/booking.html" className="text-white/60 text-sm tracking-[0.15em] uppercase font-semibold">Book a Table</a>
             <div className="flex flex-col gap-3 mt-2 pt-4 border-t border-[#D4AF37]/10">
-              <button onClick={onEnter} className="flex items-center justify-center gap-2 py-3 rounded-full bg-[#D4AF37] text-[#020403] text-xs tracking-[0.12em] font-bold uppercase">
+              <button onClick={() => navigate('/staff-pos')} className="flex items-center justify-center gap-2 py-3 rounded-full bg-[#D4AF37] text-[#020403] text-xs tracking-[0.12em] font-bold uppercase">
                 <Shield size={14} /> Staff Login
               </button>
               <button onClick={() => navigate('/customer-order')} className="flex items-center justify-center gap-2 py-3 rounded-full border border-[#D4AF37]/40 text-[#D4AF37] text-xs tracking-[0.12em] font-bold uppercase">
@@ -207,7 +207,7 @@ export default function LandingPage({ onEnter }) {
             className={`flex flex-col sm:flex-row gap-[13px] w-full justify-center ${!loadingComplete ? 'pointer-events-none' : ''}`}
           >
             <button
-              onClick={onEnter}
+              onClick={() => navigate('/staff-pos')}
               className="flex items-center justify-center gap-3 w-full sm:w-[190px] py-[104px] rounded-full bg-[#080d0a]/95 backdrop-blur-md border border-[#D4AF37]/80 text-[#D4AF37] font-cinzel text-[12px] tracking-[0.2em] font-bold uppercase hover:bg-[#D4AF37] hover:text-[#050505] shadow-[0_0_20px_rgba(212,175,55,0.25)] hover:shadow-[0_0_40px_rgba(212,175,55,0.5)] transition-all duration-500 transform hover:scale-105 active:scale-95 group cursor-pointer"
             >
               <Shield size={16} />

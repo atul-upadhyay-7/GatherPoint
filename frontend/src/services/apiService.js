@@ -1,6 +1,22 @@
 // API Service - Centralized API calls
 const API_BASE_URL = 'http://localhost:8080/api';
 
+// Global fetch interceptor to append JWT token automatically
+const originalFetch = window.fetch;
+window.fetch = async function (url, options = {}) {
+  const urlString = typeof url === 'string' ? url : (url instanceof URL ? url.toString() : '');
+  if (urlString.startsWith(API_BASE_URL)) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+      };
+    }
+  }
+  return originalFetch(url, options);
+};
+
 class ApiService {
   // Auth endpoints
   static async login(email, password, role) {
@@ -110,6 +126,30 @@ class ApiService {
     if (!response.ok) {
       const error = await response.text();
       throw new Error(error || 'Failed to create customer');
+    }
+    return response.json();
+  }
+
+  static async updateCustomer(id, customerData) {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(customerData),
+    });
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || 'Failed to update customer');
+    }
+    return response.json();
+  }
+
+  static async deleteCustomer(id) {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || 'Failed to delete customer');
     }
     return response.json();
   }
