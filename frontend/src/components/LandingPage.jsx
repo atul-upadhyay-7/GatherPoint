@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ChevronRight, Shield, User } from 'lucide-react';
 
-export default function LandingPage() {
+export default function LandingPage({ onEnter }) {
   const navigate = useNavigate();
   const [loadingComplete, setLoadingComplete] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -161,7 +161,7 @@ export default function LandingPage() {
             className={`flex flex-col sm:flex-row gap-4 w-full justify-center ${!loadingComplete ? 'pointer-events-none' : ''}`}
           >
             <button
-              onClick={() => navigate('/pos')}
+              onClick={onEnter}
               className="flex items-center justify-center gap-3 w-full sm:w-[220px] py-[16px] rounded-full bg-[#080d0a]/95 backdrop-blur-md border border-[#D4AF37]/80 text-[#D4AF37] font-cinzel text-[12px] tracking-[0.2em] font-bold uppercase hover:bg-[#D4AF37] hover:text-[#050505] shadow-[0_0_20px_rgba(212,175,55,0.25)] hover:shadow-[0_0_40px_rgba(212,175,55,0.5)] transition-all duration-500 transform hover:scale-105 active:scale-95 group cursor-pointer"
             >
               <Shield size={16} />
@@ -170,7 +170,7 @@ export default function LandingPage() {
             </button>
 
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/customer-order')}
               className="flex items-center justify-center gap-3 w-full sm:w-[220px] py-[16px] rounded-full bg-[#080d0a]/95 backdrop-blur-md border border-[#D4AF37]/40 text-[#D4AF37]/80 font-cinzel text-[12px] tracking-[0.2em] font-bold uppercase hover:bg-[#D4AF37]/20 hover:text-[#FFF] hover:border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.1)] hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all duration-500 transform hover:scale-105 active:scale-95 group cursor-pointer"
             >
               <User size={16} />
