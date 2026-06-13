@@ -1,4 +1,4 @@
-package com.GatherPoint.backend.config;
+package com.GatherPoint.backend.Security;
 
 import com.GatherPoint.backend.Model.User;
 import com.GatherPoint.backend.Repo.UserRepo;
@@ -6,10 +6,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,11 +20,13 @@ import java.util.Optional;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
+    private final UserRepo userRepo;
 
-    @Autowired
-    private UserRepo userRepo;
+    public JwtFilter(JwtUtil jwtUtil, UserRepo userRepo) {
+        this.jwtUtil = jwtUtil;
+        this.userRepo = userRepo;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -41,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 username = jwtUtil.extractUsername(jwt);
             } catch (Exception e) {
-                // Ignore parsing errors (token invalid, expired, etc.)
+                logger.warn("Invalid JWT token: " + e.getMessage());
             }
         }
 
@@ -50,12 +51,11 @@ public class JwtFilter extends OncePerRequestFilter {
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
                 if (user.isActive()) {
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                    UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(user, null,
                                     Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
-                    usernamePasswordAuthenticationToken
-                            .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
         }
