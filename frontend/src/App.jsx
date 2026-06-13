@@ -151,6 +151,27 @@ function App() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  // Add Table Handler
+  const handleAddTable = () => {
+    if (!selectedFloor) {
+      showToast('Please select a floor first.', 'error');
+      return;
+    }
+    const maxTableId = tables.reduce((max, t) => Math.max(max, t.id), 0);
+    const maxTableNum = tables.reduce((max, t) => Math.max(max, t.tableNumber), 0);
+    
+    const newTable = {
+      id: maxTableId + 1,
+      tableNumber: maxTableNum + 1,
+      seats: 4,
+      active: true,
+      floor: { id: selectedFloor.id }
+    };
+    
+    setTables([...tables, newTable]);
+    showToast(`Table ${newTable.tableNumber} added to ${selectedFloor.name}`, 'success');
+  };
+
   // Generic Request Helper
   const apiRequest = async (endpoint, method = 'GET', body = null) => {
     const headers = { 'Content-Type': 'application/json' };
@@ -1146,7 +1167,7 @@ function App() {
                   })}
                   
                   {/* Add Table Card */}
-                  <div className="pos-table-card add-table">
+                  <div className="pos-table-card add-table" onClick={handleAddTable} style={{ cursor: 'pointer' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cfad56', gap: '15px' }}>
                       <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid #cfad56', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Plus size={24} />
