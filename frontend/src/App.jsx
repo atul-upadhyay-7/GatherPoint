@@ -153,6 +153,50 @@ function App() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  // Render Table Graphics
+  const renderTableChairs = (table) => {
+    const chairs = [];
+    const isRound = table.tableNumber % 2 === 0;
+    
+    if (isRound) {
+      for (let i = 0; i < table.seats; i++) {
+        const angle = (i * 360) / table.seats;
+        chairs.push(
+          <rect key={i} x="42" y="0" width="16" height="12" rx="6" fill="#2a5038" transform={`rotate(${angle}, 50, 35)`} />
+        );
+      }
+      return (
+        <svg width="100" height="70" viewBox="0 0 100 70">
+          {chairs}
+          <circle cx="50" cy="35" r="26" fill="#cfad56" stroke="#8a6623" strokeWidth="2"/>
+          <circle cx="50" cy="35" r="3" fill="#8a6623"/>
+        </svg>
+      );
+    } else {
+      const topCount = Math.ceil(table.seats / 2);
+      const bottomCount = Math.floor(table.seats / 2);
+      
+      for (let i = 0; i < topCount; i++) {
+        const spacing = 70 / topCount;
+        const xPos = 15 + (spacing * i) + (spacing / 2) - 8;
+        chairs.push(<rect key={`t${i}`} x={xPos} y="0" width="16" height="12" rx="6" fill="#2a5038" />);
+      }
+      for (let i = 0; i < bottomCount; i++) {
+        const spacing = 70 / bottomCount;
+        const xPos = 15 + (spacing * i) + (spacing / 2) - 8;
+        chairs.push(<rect key={`b${i}`} x={xPos} y="58" width="16" height="12" rx="6" fill="#2a5038" />);
+      }
+      
+      return (
+        <svg width="100" height="70" viewBox="0 0 100 70">
+          {chairs}
+          <rect x="15" y="10" width="70" height="50" rx="8" fill="#cfad56" stroke="#8a6623" strokeWidth="2"/>
+          <circle cx="50" cy="35" r="3" fill="#8a6623"/>
+        </svg>
+      );
+    }
+  };
+
   // Add Table Handler
   const handleAddTable = (e) => {
     if (e) e.stopPropagation();
@@ -1150,25 +1194,7 @@ function App() {
                         <div className="pos-table-seats">{table.seats} Seats</div>
                         
                         <div className="pos-table-graphic-container">
-                          <svg width="100" height="70" viewBox="0 0 100 70">
-                            <rect x="25" y="0" width="16" height="12" rx="6" fill="#2a5038" />
-                            <rect x="59" y="0" width="16" height="12" rx="6" fill="#2a5038" />
-                            <rect x="25" y="58" width="16" height="12" rx="6" fill="#2a5038" />
-                            <rect x="59" y="58" width="16" height="12" rx="6" fill="#2a5038" />
-                            <rect x="5" y="27" width="12" height="16" rx="6" fill="#2a5038" />
-                            <rect x="83" y="27" width="12" height="16" rx="6" fill="#2a5038" />
-                            {table.tableNumber % 2 !== 0 ? (
-                              <>
-                                <rect x="15" y="10" width="70" height="50" rx="8" fill="#cfad56" stroke="#8a6623" strokeWidth="2"/>
-                                <circle cx="50" cy="35" r="3" fill="#8a6623"/>
-                              </>
-                            ) : (
-                              <>
-                                <circle cx="50" cy="35" r="28" fill="#cfad56" stroke="#8a6623" strokeWidth="2"/>
-                                <circle cx="50" cy="35" r="3" fill="#8a6623"/>
-                              </>
-                            )}
-                          </svg>
+                          {renderTableChairs(table)}
                         </div>
                         
                         <div className={`pos-table-status ${isOccupied ? 'occupied' : 'available'}`}>
