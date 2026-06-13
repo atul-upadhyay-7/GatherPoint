@@ -3,6 +3,7 @@ package com.GatherPoint.backend.controller;
 import com.GatherPoint.backend.Model.User;
 import com.GatherPoint.backend.Repo.UserRepo;
 import com.GatherPoint.backend.Security.JwtUtil;
+import com.GatherPoint.backend.dto.Request.ClerkLoginRequest;
 import com.GatherPoint.backend.dto.Request.LoginRequest;
 import com.GatherPoint.backend.dto.Request.RefreshTokenRequest;
 import com.GatherPoint.backend.dto.Request.SignupRequest;
@@ -62,6 +63,36 @@ public class AuthController {
         User user = userOpt.get();
         if (!user.isActive()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User account is inactive!");
+        }
+
+        String token = jwtUtil.generateToken(user.getEmail());
+
+        return ResponseEntity.ok(new AuthResponse(
+                token,
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole(),
+                user.isActive()
+        ));
+    }
+
+    @PostMapping("/clerk-login")
+    public ResponseEntity<?> clerkLogin(@RequestBody ClerkLoginRequest request) {
+        Optional<User> userOpt = userRepo.findByEmail(request.getEmail());
+        User user;
+
+        if (userOpt.isEmpty()) {
+            user = User.builder()
+                    .name(request.getName())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(java.util.UUID.randomUUID().toString()))
+                    .role(com.GatherPoint.backend.Constants.Role.EMPLOYEE)
+                    .active(true)
+                    .build();
+            user = userRepo.save(user);
+        } else {
+            user = userOpt.get();
         }
 
         String token = jwtUtil.generateToken(user.getEmail());

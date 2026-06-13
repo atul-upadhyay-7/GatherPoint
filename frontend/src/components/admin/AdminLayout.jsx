@@ -1,0 +1,49 @@
+import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import Sidebar from './Sidebar';
+import Topbar from './Topbar';
+
+const AdminLayout = () => {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  return (
+    <div 
+      className="flex h-screen text-[#FAF8F1] overflow-hidden relative"
+      style={{
+        backgroundImage: "url('/admin-bg.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* Blurred Glass Overlay */}
+      <div className="absolute inset-0 bg-[#071B14]/75 backdrop-blur-xl z-0"></div>
+
+      {/* Sidebar */}
+      <div className="z-20">
+        <Sidebar 
+          isCollapsed={isSidebarCollapsed} 
+          setIsCollapsed={setIsSidebarCollapsed} 
+        />
+      </div>
+
+      {/* Main Content Wrapper */}
+      <div 
+        className={`flex flex-col flex-1 transition-all duration-300 ease-in-out z-10 ${
+          isSidebarCollapsed ? 'ml-[80px]' : 'ml-[280px]'
+        }`}
+      >
+        {/* Top Navbar */}
+        <Topbar />
+
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-6 scrollbar-hide">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default AdminLayout;

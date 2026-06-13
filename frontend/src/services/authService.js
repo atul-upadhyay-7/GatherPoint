@@ -15,6 +15,19 @@ class AuthService {
     return response.json();
   }
 
+  static async clerkLogin(email, name) {
+    const response = await fetch(`${API_BASE_URL}/auth/clerk-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name }),
+    });
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || 'Clerk login failed');
+    }
+    return response.json();
+  }
+
   static async signup(name, email, password, role) {
     const response = await fetch(`${API_BASE_URL}/auth/signup`, {
       method: 'POST',

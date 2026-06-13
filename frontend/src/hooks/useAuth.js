@@ -21,16 +21,20 @@ export default function useAuth() {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        if (isSignedIn && clerkUser && getToken) {
-          const clerkToken = await getToken();
-          setToken(clerkToken);
-          localStorage.setItem('token', clerkToken);
+        if (isSignedIn && clerkUser) {
+          const email = clerkUser.primaryEmailAddress?.emailAddress;
+          const name = clerkUser.fullName || 'Clerk User';
 
-          // Fetch from backend profile
-          const currentUser = await AuthService.getCurrentUser();
-          if (currentUser) {
-            setUser(currentUser);
-            localStorage.setItem('user', JSON.stringify(currentUser));
+          if (email) {
+            try {
+              const userData = await AuthService.clerkLogin(email, name);
+              AuthService.setUser(userData);
+              setUser(userData);
+              setToken(userData.token);
+              localStorage.setItem('token', userData.token);
+            } catch (err) {
+              console.error('Failed to sync Clerk with backend:', err);
+            }
           }
         } else {
           // Fallback to local storage (for standard email/password login)
