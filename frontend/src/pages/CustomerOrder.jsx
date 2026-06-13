@@ -328,7 +328,7 @@ const CustomerOrder = () => {
     <div className="bg-customer-bg min-h-screen text-customer-text font-sans selection:bg-customer-accent selection:text-customer-bg">
 
       {/* ── Full-Width Navbar ── */}
-      <nav className="w-full sticky top-0 z-50 bg-customer-bg/95 backdrop-blur-xl border-b border-white/10 shadow-[0_2px_24px_rgba(0,0,0,0.5)]">
+      <nav className="relative w-full sticky top-0 z-50 bg-customer-bg/95 backdrop-blur-xl border-b border-white/10 shadow-[0_2px_24px_rgba(0,0,0,0.5)]">
         <div className="w-full px-6 lg:px-12 h-[80px] flex items-center justify-between gap-6">
 
           {/* Brand */}
@@ -357,6 +357,8 @@ const CustomerOrder = () => {
               Browse Menu <ChevronDown size={22} />
             </motion.button>
 
+          {/* Right actions — anchored to nav via relative parent */}
+          <div className="absolute top-5 right-10 flex items-center gap-3">
             {/* Cart */}
             <motion.button
               whileHover={{ scale: 1.06 }}
@@ -369,6 +371,8 @@ const CustomerOrder = () => {
                 }
               }}
               className="relative flex items-center gap-2.5 px-9 py-4 rounded-full bg-customer-primary text-customer-text font-black text-lg hover:bg-customer-accent hover:text-customer-bg transition-colors duration-200 shadow-[0_0_22px_rgba(45,106,79,0.4)]"
+              onClick={() => document.getElementById('cart-trigger-btn')?.click()}
+              className="relative flex items-center justify-center gap-2 px-12 py-3.5 rounded-full bg-customer-primary text-customer-text font-bold text-base hover:bg-customer-accent hover:text-customer-bg transition-colors duration-200 shadow-[0_0_18px_rgba(45,106,79,0.35)]"
             >
               <ShoppingBag size={22} />
               <span className="hidden sm:inline">Cart</span>
