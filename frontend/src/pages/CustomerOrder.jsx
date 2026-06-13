@@ -114,13 +114,13 @@ const CustomerOrder = () => {
     <div className="bg-customer-bg min-h-screen text-customer-text font-sans selection:bg-customer-accent selection:text-customer-bg">
       <HeroSection onBrowseClick={handleBrowseClick} />
       
-      <div ref={menuRef} className="w-full max-w-7xl mx-auto px-8 lg:px-12 pb-32">
+      <div ref={menuRef} className="w-full max-w-[1600px] mx-auto px-4 lg:px-8 pb-32">
         <CategoryTabs 
           selectedCategory={selectedCategory} 
           onSelectCategory={setSelectedCategory} 
         />
         
-        <div className="w-full py-12 flex flex-col items-center">
+        <div className="w-full py-12 flex flex-col items-center justify-center">
           {(() => {
             const rows = [];
             let i = 0;
@@ -135,14 +135,14 @@ const CustomerOrder = () => {
             return rows.map((row, index) => (
               <div 
                 key={index} 
-                className="w-full flex flex-wrap justify-center items-start gap-8 mb-8 md:mb-10 mx-auto"
+                className="w-full flex flex-wrap justify-center items-start gap-6 md:gap-10 mb-8 md:mb-12 mx-auto"
               >
                 {row.map(product => (
                   <div 
                     key={product.id} 
-                    className={`w-full sm:w-[calc(50%-1rem)] ${row.length === 4 ? 'lg:w-[calc(25%-1.5rem)]' : 'lg:w-[calc(33.333%-1.5rem)]'} flex justify-center`}
+                    className="flex justify-center w-full sm:w-auto"
                   >
-                    <div className="w-full max-w-[380px]">
+                    <div className="w-full sm:w-[320px] lg:w-[360px]">
                       <ProductCard product={product} onAdd={addToCart} />
                     </div>
                   </div>
