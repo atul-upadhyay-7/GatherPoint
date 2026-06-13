@@ -68,7 +68,7 @@ const ProductCard = ({ product, onAdd }) => {
       </motion.span>
 
       {/* Default name */}
-      <div ref={nameRef} className="absolute inset-x-0 bottom-0 px-8 py-8 text-center flex flex-col items-center">
+      <div ref={nameRef} className="absolute inset-x-0 bottom-6 px-8 pb-4 pt-4 text-center flex flex-col items-center">
         <h3 className="text-2xl font-bold text-white drop-shadow-lg">{product.productName}</h3>
         <div className="flex items-center justify-center gap-2 mt-1">
           <Star size={13} className="text-yellow-400 fill-yellow-400" />
@@ -78,7 +78,7 @@ const ProductCard = ({ product, onAdd }) => {
       </div>
 
       {/* Hover content */}
-      <div ref={contentRef} className="absolute inset-0 flex flex-col justify-end items-center text-center px-8 py-6 opacity-0">
+      <div ref={contentRef} className="absolute inset-x-0 top-0 bottom-6 flex flex-col justify-end items-center text-center px-8 pt-4 pb-4 opacity-0">
         <span className="text-customer-accent text-xs font-bold uppercase tracking-widest mb-1">{product.category}</span>
         <h3 className="text-[1.35rem] font-bold text-white mb-1 leading-tight">{product.productName}</h3>
 
@@ -109,7 +109,7 @@ const ProductCard = ({ product, onAdd }) => {
         </div>
 
         {/* Add To Cart Button */}
-        <div className="flex justify-center w-full mt-1 mb-8">
+        <div className="flex justify-center w-full mt-1 mb-1">
           <motion.button
             whileTap={{ scale: 0.92 }}
             whileHover={{ scale: 1.05 }}
