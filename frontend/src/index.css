@@ -10,6 +10,10 @@
   --color-customer-text: #FAF8F1;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --font-display: 'Outfit', sans-serif;
   --font-sans: 'Plus Jakarta Sans', sans-serif;

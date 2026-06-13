@@ -1,10 +1,25 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 
 const HeroSection = ({ onBrowseClick }) => {
   const leftContentRef = useRef(null);
   const rightContentRef = useRef(null);
   const floatingElementsRef = useRef(null);
+  
+  const [displayedText, setDisplayedText] = useState("");
+  const fullText = "Gather Point";
+
+  useEffect(() => {
+    // Typing Effect
+    let i = 0;
+    const typingInterval = setInterval(() => {
+      setDisplayedText(fullText.slice(0, i + 1));
+      i++;
+      if (i > fullText.length) clearInterval(typingInterval);
+    }, 150);
+
+    return () => clearInterval(typingInterval);
+  }, []);
 
   useEffect(() => {
     // Fade in left content
@@ -40,18 +55,18 @@ const HeroSection = ({ onBrowseClick }) => {
         
         {/* Left Content */}
         <div ref={leftContentRef} className="flex flex-col items-start z-10">
-          <h1 className="text-6xl md:text-8xl font-bold font-sans text-customer-text mb-4 leading-tight">
-            Gather Point
+          <h1 className="text-6xl md:text-8xl font-calligraphy text-customer-accent mb-6 leading-tight min-h-[1.2em]">
+            <span className="border-r-4 border-customer-accent pr-1 animate-pulse">{displayedText}</span>
           </h1>
-          <p className="text-xl md:text-2xl text-customer-text/80 mb-8 max-w-lg font-light leading-relaxed">
-            Connecting tables, people and experience.
-          </p>
           <button 
             onClick={onBrowseClick}
-            className="px-8 py-4 bg-customer-primary text-customer-text font-bold text-lg rounded-full hover:bg-customer-accent hover:text-customer-bg transition-colors duration-300 shadow-[0_4px_20px_rgba(45,106,79,0.4)] hover:shadow-[0_4px_25px_rgba(212,163,115,0.5)]"
+            className="px-8 py-4 bg-customer-primary text-customer-text font-bold text-lg rounded-full hover:bg-customer-accent hover:text-customer-bg transition-colors duration-300 shadow-[0_4px_20px_rgba(45,106,79,0.4)] hover:shadow-[0_4px_25px_rgba(212,163,115,0.5)] my-4"
           >
             Browse Menu
           </button>
+          <p className="text-xl md:text-2xl text-customer-text/80 mt-6 max-w-lg font-light leading-relaxed">
+            Connecting tables, people and experience.
+          </p>
         </div>
 
         {/* Right Content */}
