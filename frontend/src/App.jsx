@@ -68,6 +68,8 @@ function App() {
   const [upiConfirmed, setUpiConfirmed] = useState(false);
   const [customerModal, setCustomerModal] = useState(false);
   const [couponModal, setCouponModal] = useState(false);
+  const [isAddingTable, setIsAddingTable] = useState(false);
+  const [newTableSeats, setNewTableSeats] = useState(4);
 
   // KDS State
   const [kdsSearch, setKdsSearch] = useState('');
@@ -152,16 +154,15 @@ function App() {
   };
 
   // Add Table Handler
-  const handleAddTable = () => {
+  const handleAddTable = (e) => {
+    if (e) e.stopPropagation();
     if (!selectedFloor) {
       showToast('Please select a floor first.', 'error');
+      setIsAddingTable(false);
       return;
     }
     
-    const seatsInput = window.prompt("Enter number of seats for the new table:", "4");
-    if (seatsInput === null) return; // User cancelled
-    
-    const seats = parseInt(seatsInput, 10);
+    const seats = parseInt(newTableSeats, 10);
     if (isNaN(seats) || seats <= 0) {
       showToast('Invalid number of seats entered.', 'error');
       return;
@@ -180,6 +181,8 @@ function App() {
     
     setTables([...tables, newTable]);
     showToast(`Table ${newTable.tableNumber} added with ${seats} seats`, 'success');
+    setIsAddingTable(false);
+    setNewTableSeats(4);
   };
 
   // Generic Request Helper
@@ -1177,13 +1180,35 @@ function App() {
                   })}
                   
                   {/* Add Table Card */}
-                  <div className="pos-table-card add-table" onClick={handleAddTable} style={{ cursor: 'pointer' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#cfad56', gap: '15px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid #cfad56', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Plus size={24} />
+                  <div className="pos-table-card add-table" onClick={() => !isAddingTable && setIsAddingTable(true)} style={{ cursor: isAddingTable ? 'default' : 'pointer' }}>
+                    {isAddingTable ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', gap: '15px' }}>
+                        <span style={{ color: '#cfad56', fontWeight: 600 }}>Seats:</span>
+                        <input 
+                          type="number" 
+                          value={newTableSeats} 
+                          onChange={(e) => setNewTableSeats(e.target.value)}
+                          style={{ width: '60px', padding: '8px', borderRadius: '6px', border: '1px solid #cfad56', background: 'transparent', color: '#fff', textAlign: 'center', outline: 'none' }}
+                          min="1"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleAddTable(e);
+                            if (e.key === 'Escape') setIsAddingTable(false);
+                          }}
+                        />
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                          <button onClick={(e) => { e.stopPropagation(); setIsAddingTable(false); }} style={{ padding: '6px 12px', background: 'transparent', border: '1px solid #4a5568', color: '#8b9691', borderRadius: '4px', fontSize: '0.8rem', cursor: 'pointer' }}>Cancel</button>
+                          <button onClick={handleAddTable} style={{ padding: '6px 12px', background: '#cfad56', color: '#0a100d', border: 'none', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}>Add</button>
+                        </div>
                       </div>
-                      <span style={{ fontSize: '0.9rem', color: '#8b9691' }}>Add Table</span>
-                    </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#cfad56', gap: '15px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid #cfad56', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Plus size={24} />
+                        </div>
+                        <span style={{ fontSize: '0.9rem', color: '#8b9691' }}>Add Table</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
