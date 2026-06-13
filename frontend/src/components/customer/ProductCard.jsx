@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Plus } from 'lucide-react';
+import { Plus, Star, Clock, Flame } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,6 +22,11 @@ const ProductCard = ({ product, onAdd }) => {
           }
         }
       );
+    }, cardRef);
+    
+    return () => ctx.revert();
+  }, []);
+
   // Fallbacks for missing data
   const rating = product.rating || '4.5';
   const prepTime = product.prepTime || '10-15 mins';
