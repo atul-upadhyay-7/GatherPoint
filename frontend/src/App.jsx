@@ -677,41 +677,49 @@ function App() {
   // LOGIN SCREEN
   if (screen === 'login') {
     return (
-      <div className="layout-container" style={{ alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at top, #141724 0%, #08090d 100%)' }}>
-        <div className="glass-panel" style={{ width: '100%', maxWidth: '420px', padding: '40px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <h1 style={{ fontSize: '2.5rem', background: 'var(--primary-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '8px' }}>GatherPoint</h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Restaurant POS Management System</p>
+      <div className="auth-bg">
+        <div className="auth-split-card">
+          {/* Left Side: Image with Overlay */}
+          <div className="auth-image-side">
+            <div className="auth-image-overlay">
+              <h1 className="auth-brand-text">GatherPoint</h1>
+            </div>
           </div>
-          <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <input 
-                type="email" 
-                className="form-control" 
-                placeholder="name@gatherpoint.com" 
-                required 
-                value={authForm.email} 
-                onChange={e => setAuthForm({ ...authForm, email: e.target.value })}
-              />
+          
+          {/* Right Side: Form */}
+          <div className="auth-form-side">
+            <h2>Welcome Back.</h2>
+            <p>Log in to access your POS terminal & dashboard.</p>
+            
+            <form onSubmit={handleLogin}>
+              <div>
+                <input 
+                  type="email" 
+                  className="auth-input" 
+                  placeholder="Email Address" 
+                  required 
+                  value={authForm.email} 
+                  onChange={e => setAuthForm({ ...authForm, email: e.target.value })}
+                />
+              </div>
+              <div>
+                <input 
+                  type="password" 
+                  className="auth-input" 
+                  placeholder="Password" 
+                  required 
+                  value={authForm.password}
+                  onChange={e => setAuthForm({ ...authForm, password: e.target.value })}
+                />
+              </div>
+              <button type="submit" className="auth-btn">
+                Continue
+              </button>
+            </form>
+            
+            <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.9rem', color: '#64748b' }}>
+              Need an account? <span onClick={() => setScreen('signup')} className="auth-link">Create Account</span>
             </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input 
-                type="password" 
-                className="form-control" 
-                placeholder="••••••••" 
-                required 
-                value={authForm.password}
-                onChange={e => setAuthForm({ ...authForm, password: e.target.value })}
-              />
-            </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '14px', fontSize: '1rem', marginTop: '10px' }}>
-              <LogIn size={20} /> Sign In
-            </button>
-          </form>
-          <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            Need an account? <span onClick={() => setScreen('signup')} style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 'bold' }}>Create Account</span>
           </div>
         </div>
       </div>
@@ -721,64 +729,69 @@ function App() {
   // SIGNUP SCREEN
   if (screen === 'signup') {
     return (
-      <div className="layout-container" style={{ alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at top, #141724 0%, #08090d 100%)' }}>
-        <div className="glass-panel" style={{ width: '100%', maxWidth: '440px', padding: '40px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <h1 style={{ fontSize: '2.2rem', background: 'var(--primary-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '8px' }}>Join GatherPoint</h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Initialize POS Terminal & Accounts</p>
+      <div className="auth-bg">
+        <div className="auth-split-card">
+          {/* Left Side: Image with Overlay */}
+          <div className="auth-image-side">
+            <div className="auth-image-overlay">
+              <h1 className="auth-brand-text">GatherPoint</h1>
+            </div>
           </div>
-          <form onSubmit={handleSignup}>
-            <div className="form-group">
-              <label className="form-label">Full Name</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                placeholder="John Doe" 
-                required 
-                value={authForm.name} 
-                onChange={e => setAuthForm({ ...authForm, name: e.target.value })}
-              />
+          
+          {/* Right Side: Form */}
+          <div className="auth-form-side">
+            <h2>Join GatherPoint.</h2>
+            <p>Initialize your POS Terminal & Accounts.</p>
+            
+            <form onSubmit={handleSignup}>
+              <div>
+                <input 
+                  type="text" 
+                  className="auth-input" 
+                  placeholder="Full Name" 
+                  required 
+                  value={authForm.name} 
+                  onChange={e => setAuthForm({ ...authForm, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <input 
+                  type="email" 
+                  className="auth-input" 
+                  placeholder="Email Address" 
+                  required 
+                  value={authForm.email} 
+                  onChange={e => setAuthForm({ ...authForm, email: e.target.value })}
+                />
+              </div>
+              <div>
+                <input 
+                  type="password" 
+                  className="auth-input" 
+                  placeholder="Password" 
+                  required 
+                  value={authForm.password}
+                  onChange={e => setAuthForm({ ...authForm, password: e.target.value })}
+                />
+              </div>
+              <div>
+                <select 
+                  className="auth-input" 
+                  value={authForm.role}
+                  onChange={e => setAuthForm({ ...authForm, role: e.target.value })}
+                >
+                  <option value="EMPLOYEE">Employee (POS Terminal)</option>
+                  <option value="ADMIN">Admin (Backend Dashboard)</option>
+                </select>
+              </div>
+              <button type="submit" className="auth-btn">
+                Register
+              </button>
+            </form>
+            
+            <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.9rem', color: '#64748b' }}>
+              Already registered? <span onClick={() => setScreen('login')} className="auth-link">Sign In</span>
             </div>
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <input 
-                type="email" 
-                className="form-control" 
-                placeholder="john@gatherpoint.com" 
-                required 
-                value={authForm.email} 
-                onChange={e => setAuthForm({ ...authForm, email: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input 
-                type="password" 
-                className="form-control" 
-                placeholder="Create strong password" 
-                required 
-                value={authForm.password}
-                onChange={e => setAuthForm({ ...authForm, password: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">System Role</label>
-              <select 
-                className="form-control" 
-                value={authForm.role}
-                onChange={e => setAuthForm({ ...authForm, role: e.target.value })}
-                style={{ background: '#14161f' }}
-              >
-                <option value="EMPLOYEE">Employee (POS Terminal)</option>
-                <option value="ADMIN">Admin (Backend Dashboard)</option>
-              </select>
-            </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '14px', fontSize: '1rem', marginTop: '10px' }}>
-              <UserPlus size={20} /> Register & Sign In
-            </button>
-          </form>
-          <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            Already registered? <span onClick={() => setScreen('login')} style={{ color: 'var(--primary)', cursor: 'pointer', fontWeight: 'bold' }}>Sign In</span>
           </div>
         </div>
       </div>
