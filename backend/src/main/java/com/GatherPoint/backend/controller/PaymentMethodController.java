@@ -1,58 +1,47 @@
 package com.GatherPoint.backend.controller;
 
-import com.GatherPoint.backend.Model.PaymentMethod;
-import com.GatherPoint.backend.Repo.PaymentMethodRepo;
-import lombok.RequiredArgsConstructor;
+import com.GatherPoint.backend.Service.PaymentMethodService;
+import com.GatherPoint.backend.dto.Request.PaymentMethodRequest;
+import com.GatherPoint.backend.dto.Response.PaymentMethodResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/payment-methods")
-@RequiredArgsConstructor
 public class PaymentMethodController {
 
-    private final PaymentMethodRepo paymentMethodRepo;
+    private final PaymentMethodService paymentMethodService;
 
-    @GetMapping
-    public List<PaymentMethod> getAll() {
-        return paymentMethodRepo.findAll();
+    public PaymentMethodController(PaymentMethodService paymentMethodService) {
+        this.paymentMethodService = paymentMethodService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PaymentMethod> getById(@PathVariable Long id) {
-        return paymentMethodRepo.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    @GetMapping
+    public List<PaymentMethodResponse> getAll() {
+        return paymentMethodService.getAll();
+    }
+
+    @GetMapping("/enabled")
+    public List<PaymentMethodResponse> getEnabled() {
+        return paymentMethodService.getEnabled();
     }
 
     @PostMapping
-    public PaymentMethod create(@RequestBody PaymentMethod pm) {
-        return paymentMethodRepo.save(pm);
+    public ResponseEntity<PaymentMethodResponse> create(@RequestBody PaymentMethodRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentMethodService.create(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PaymentMethod> update(@PathVariable Long id, @RequestBody PaymentMethod details) {
-        return paymentMethodRepo.findById(id).map(pm -> {
-            pm.setName(details.getName());
-            pm.setEnabled(details.isEnabled());
-            pm.setUpiId(details.getUpiId());
-            return ResponseEntity.ok(paymentMethodRepo.save(pm));
-        }).orElse(ResponseEntity.notFound().build());
-    }
-
-    @PatchMapping("/{id}/toggle")
-    public ResponseEntity<PaymentMethod> toggle(@PathVariable Long id) {
-        return paymentMethodRepo.findById(id).map(pm -> {
-            pm.setEnabled(!pm.isEnabled());
-            return ResponseEntity.ok(paymentMethodRepo.save(pm));
-        }).orElse(ResponseEntity.notFound().build());
+    public PaymentMethodResponse update(@PathVariable Long id, @RequestBody PaymentMethodRequest request) {
+        return paymentMethodService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        if (!paymentMethodRepo.existsById(id)) return ResponseEntity.notFound().build();
-        paymentMethodRepo.deleteById(id);
-        return ResponseEntity.ok("Deleted");
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        paymentMethodService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
