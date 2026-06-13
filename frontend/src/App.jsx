@@ -1030,16 +1030,37 @@ function App() {
     <div className="dashboard-layout">
       {/* Top Navbar */}
       <nav className="top-navbar">
-        <div className="top-navbar-brand">GatherPoint</div>
+        <div className="top-navbar-left">
+          <div className="top-navbar-brand">GatherPoint</div>
+          <div className="top-navbar-breadcrumb">
+            <span className="breadcrumb-dot" />
+            <span className="breadcrumb-text">
+              {activeTab === 'pos' ? 'POS Terminal' :
+               activeTab === 'kitchen' ? 'Kitchen Display' :
+               activeTab === 'reports' ? 'Reports' :
+               activeTab === 'admin' && adminTab === 'dashboard' ? 'Dashboard' :
+               activeTab === 'admin' && adminTab === 'products' ? 'Products' :
+               activeTab === 'admin' && adminTab === 'categories' ? 'Categories' :
+               activeTab === 'admin' && adminTab === 'payment_methods' ? 'Payment Methods' :
+               activeTab === 'admin' && adminTab === 'tables' ? 'Tables & Floors' :
+               activeTab === 'admin' && adminTab === 'coupons' ? 'Coupons & Promotions' :
+               activeTab === 'admin' && adminTab === 'employees' ? 'Employees' :
+               activeTab === 'sessions' ? 'Session Manager' : 'Dashboard'}
+            </span>
+          </div>
+        </div>
         <div className="top-navbar-right">
           <div className="top-navbar-profile">
             <div className="profile-avatar">
               {user ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
-            <span>{user ? user.name : 'User Profile'}</span>
+            <div className="profile-info">
+              <span className="profile-name">{user ? user.name : 'User'}</span>
+              <span className="profile-role">{user ? user.role || 'STAFF' : 'GUEST'}</span>
+            </div>
           </div>
-          <button className="btn btn-secondary" onClick={handleLogout} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
-            <LogOut size={16} /> Logout
+          <button className="btn-logout" onClick={handleLogout} title="Logout">
+            <LogOut size={16} />
           </button>
         </div>
       </nav>
@@ -1047,32 +1068,34 @@ function App() {
       <div className="layout-container">
         {/* Toast Alert Banner */}
         {toast && (
-          <div style={{
-            position: 'fixed',
-            top: '85px',
-            right: '20px',
-            zIndex: 9999,
-            padding: '16px 24px',
-            borderRadius: 'var(--radius-md)',
-            background: toast.type === 'error' ? 'var(--danger-gradient)' : 'var(--accent-gradient)',
-            color: '#fff',
-            boxShadow: 'var(--shadow-lg)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            fontWeight: 600,
-            animation: 'slideUp 0.2s ease'
-          }}>
-            {toast.type === 'error' ? '⚠️' : '✓'} {toast.message}
+          <div className={`toast-banner toast-${toast.type}`}>
+            <span className="toast-icon">{toast.type === 'error' ? '⚠️' : '✓'}</span>
+            {toast.message}
           </div>
         )}
 
         {/* Sidebar Navigation */}
         <aside className="sidebar">
-          <div className="sidebar-brand" style={{ marginBottom: '30px' }}>
-            <span>Dashboard</span>
-          </div>
+          <div className="sidebar-section-label">Operations</div>
+          <ul className="sidebar-menu">
+            <li 
+              className={`sidebar-item ${activeTab === 'pos' ? 'active' : ''}`}
+              onClick={() => setActiveTab('pos')}
+            >
+              <ShoppingBag size={20} />
+              <span>POS Terminal</span>
+            </li>
+            <li 
+              className={`sidebar-item ${activeTab === 'kitchen' ? 'active' : ''}`}
+              onClick={() => setActiveTab('kitchen')}
+            >
+              <Coffee size={20} />
+              <span>Kitchen Display</span>
+            </li>
+          </ul>
 
+          <div className="sidebar-divider" />
+          <div className="sidebar-section-label">Management</div>
           <ul className="sidebar-menu">
             <li 
               className={`sidebar-item ${activeTab === 'admin' && adminTab === 'dashboard' ? 'active' : ''}`}
@@ -1107,7 +1130,7 @@ function App() {
               onClick={() => { setActiveTab('admin'); setAdminTab('tables'); }}
             >
               <Layers size={20} />
-              <span>Tables/Floors</span>
+              <span>Tables & Floors</span>
             </li>
             <li 
               className={`sidebar-item ${activeTab === 'admin' && adminTab === 'coupons' ? 'active' : ''}`}
@@ -1130,11 +1153,12 @@ function App() {
               <BarChart3 size={20} />
               <span>Reports</span>
             </li>
-            <li 
-              className={`sidebar-item`}
-              onClick={handleLogout}
-              style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '15px' }}
-            >
+          </ul>
+
+          <div className="sidebar-spacer" />
+          <div className="sidebar-divider" />
+          <ul className="sidebar-menu">
+            <li className="sidebar-item sidebar-logout" onClick={handleLogout}>
               <LogOut size={20} />
               <span>Logout</span>
             </li>
