@@ -5,6 +5,7 @@ import {
   CheckCircle, Clock, BarChart3, Users, Gift, X, Search, 
   MapPin, RefreshCw, Send, Check, Printer, FileText, ChevronRight 
 } from 'lucide-react';
+import LandingPage from './components/LandingPage';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
@@ -12,7 +13,7 @@ function App() {
   // Global States
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [screen, setScreen] = useState('login'); // login, signup, main
+  const [screen, setScreen] = useState('landing'); // landing, login, signup, main
   const [activeTab, setActiveTab] = useState('pos'); // pos, admin, kitchen, reports, sessions
   const [adminTab, setAdminTab] = useState('products'); // products, categories, employees, coupons, promotions
   const [toast, setToast] = useState(null);
@@ -673,6 +674,11 @@ function App() {
   };
 
   // --- SUB-SCREENS ---
+  
+  // LANDING SCREEN
+  if (screen === 'landing') {
+    return <LandingPage onEnter={() => setScreen('login')} />;
+  }
   
   // LOGIN SCREEN
   if (screen === 'login') {
