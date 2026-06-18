@@ -17,6 +17,8 @@ import {
 const TAX_RATE = 0.05;
 const CATEGORY_ICONS = { Beverages: '☕', Starters: '🥗', Mains: '🍝', Desserts: '🍰', Specials: '⭐' };
 
+const TAX_RATE = 0.05;
+
 export default function PosTerminal() {
   const { user } = useAuth();
   const canSellOffline = user?.allowOfflineSelling !== false;
@@ -387,6 +389,253 @@ export default function PosTerminal() {
           </div>
         </div>
       </div>
+
+      {/* ═══ Table Selection Modal ═══════════════════════════════════════════ */}
+      {showTableModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-gray-900 border border-gray-700 max-w-lg w-full rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex justify-between items-center border-b border-gray-700/50 pb-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <UtensilsCrossed size={18} className="text-[#D4AF37]" />
+                Select Table
+              </h3>
+              <button onClick={() => setShowTableModal(false)} className="text-gray-400 hover:text-white p-1 hover:bg-gray-700 rounded-lg transition-colors cursor-pointer">
+                <X size={18} />
+              </button>
+            </div>
+
+            <button
+              onClick={() => { setSelectedTable(null); setShowTableModal(false); }}
+              className={`w-full p-3 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
+                !selectedTable
+                  ? 'bg-[#D4AF37]/10 border-[#D4AF37]/50 text-[#D4AF37]'
+                  : 'bg-gray-800/40 border-gray-700/40 text-gray-300 hover:border-gray-600'
+              }`}
+            >
+              Takeaway (No Table)
+            </button>
+
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-64 overflow-y-auto pr-1">
+              {tables.length === 0 ? (
+                <p className="col-span-4 text-center text-gray-500 text-sm py-8">No active tables configured.</p>
+              ) : (
+                tables.map(table => (
+                  <button
+                    key={table.id}
+                    onClick={() => { setSelectedTable(table); setShowTableModal(false); }}
+                    className={`p-3 rounded-xl text-center border transition-all cursor-pointer ${
+                      selectedTable?.id === table.id
+                        ? 'bg-[#D4AF37]/10 border-[#D4AF37]/50 text-[#D4AF37]'
+                        : 'bg-gray-800/40 border-gray-700/40 text-gray-300 hover:border-gray-600 hover:text-white'
+                    }`}
+                  >
+                    <div className="font-extrabold text-lg">{table.tableNumber}</div>
+                    <div className="text-[10px] text-gray-500 mt-0.5">{table.seats} seats</div>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Payment Modal ═══════════════════════════════════════════════════ */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-gray-900 border border-gray-700 max-w-md w-full rounded-3xl p-6 shadow-2xl space-y-5">
+            <div className="flex justify-between items-center border-b border-gray-700/50 pb-3">
+              <h3 className="text-lg font-bold text-white">Payment</h3>
+              <button onClick={() => setShowPaymentModal(false)} className="text-gray-400 hover:text-white p-1 hover:bg-gray-700 rounded-lg transition-colors cursor-pointer">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Order summary */}
+            <div className="bg-gray-800/50 border border-gray-700/40 rounded-2xl p-4 space-y-1.5 text-sm">
+              <div className="flex justify-between text-gray-400"><span>Items ({cart.reduce((s,i)=>s+i.qty,0)})</span><span>₹{subtotal.toFixed(2)}</span></div>
+              {productDiscount > 0 && <div className="flex justify-between text-emerald-400"><span>Product Promos</span><span>-₹{productDiscount.toFixed(2)}</span></div>}
+              {orderPromoDiscount > 0 && <div className="flex justify-between text-emerald-400"><span>Order Promo</span><span>-₹{orderPromoDiscount.toFixed(2)}</span></div>}
+              {couponDiscount > 0 && <div className="flex justify-between text-emerald-400"><span>Coupon Discount</span><span>-₹{couponDiscount.toFixed(2)}</span></div>}
+              <div className="flex justify-between text-gray-400"><span>Tax</span><span>₹{tax.toFixed(2)}</span></div>
+              <div className="flex justify-between font-extrabold text-base text-white border-t border-gray-700/50 pt-2 mt-2">
+                <span>Total Due</span>
+                <span className="text-[#D4AF37]">₹{total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Payment methods */}
+            <div>
+              <p className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-3">Select Payment Method</p>
+              <div className="grid grid-cols-3 gap-3">
+                {paymentMethods.map(pm => (
+                  <button
+                    key={pm.id}
+                    onClick={() => {
+                      setSelectedPaymentMethod(pm);
+                      setCashReceived('');
+                      setCardTxnRef('');
+                      setUpiTxnRef('');
+                    }}
+                    className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center gap-2 ${
+                      selectedPaymentMethod?.id === pm.id
+                        ? 'bg-[#D4AF37]/10 border-[#D4AF37]/50 text-[#D4AF37]'
+                        : 'bg-gray-800/40 border-gray-700/40 text-gray-400 hover:border-gray-600 hover:text-white'
+                    }`}
+                  >
+                    <PayMethodIcon type={pm.type || pm.name} />
+                    <span className="text-xs font-bold">{pm.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Payment inputs based on selection */}
+            {selectedPaymentMethod && (
+              <div className="space-y-4 pt-2 border-t border-gray-800">
+                {selectedPaymentMethod.name.toUpperCase() === 'CASH' && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-1.5">Cash Received *</label>
+                      <input
+                        type="number"
+                        min={total}
+                        step="0.01"
+                        required
+                        placeholder="Enter cash amount..."
+                        value={cashReceived}
+                        onChange={e => setCashReceived(e.target.value)}
+                        className="w-full bg-gray-900 border border-gray-800 rounded-xl py-2.5 px-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+                    {parseFloat(cashReceived) >= total && (
+                      <div className="flex justify-between items-center bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
+                        <span className="text-xs text-emerald-400 font-semibold">Change Due:</span>
+                        <span className="text-lg text-emerald-400 font-extrabold">₹{((parseFloat(cashReceived) || 0) - total).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {selectedPaymentMethod.name.toUpperCase() === 'CARD' && (
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-1.5">Transaction Reference *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter card transaction ref..."
+                      value={cardTxnRef}
+                      onChange={e => setCardTxnRef(e.target.value)}
+                      className="w-full bg-gray-900 border border-gray-800 rounded-xl py-2.5 px-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50"
+                    />
+                  </div>
+                )}
+
+                {selectedPaymentMethod.name.toUpperCase() === 'UPI' && (
+                  <div className="flex flex-col items-center justify-center space-y-3 p-3 bg-gray-800/20 border border-gray-800 rounded-2xl">
+                    <p className="text-xs text-gray-400 font-semibold text-center">
+                      Scan QR Code to pay with UPI ID: <span className="text-[#D4AF37] font-mono">{selectedPaymentMethod.upiId || 'cafe@ybl'}</span>
+                    </p>
+                    <div className="p-3 bg-white rounded-2xl shadow-inner">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                          `upi://pay?pa=${selectedPaymentMethod.upiId || 'cafe@ybl'}&pn=GatherPoint%20Cafe&am=${total.toFixed(2)}&cu=INR`
+                        )}`}
+                        alt="UPI QR Code"
+                        className="w-36 h-36"
+                      />
+                    </div>
+                    <div className="w-full">
+                      <label className="block text-[10px] font-bold uppercase text-gray-400 tracking-wider mb-1">Optional Txn Reference</label>
+                      <input
+                        type="text"
+                        placeholder="UPI reference number..."
+                        value={upiTxnRef}
+                        onChange={e => setUpiTxnRef(e.target.value)}
+                        className="w-full bg-gray-900 border border-gray-800 rounded-xl py-2 px-3 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {errorMsg && (
+              <div className="flex items-center gap-2 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs">
+                <AlertCircle size={14} />{errorMsg}
+              </div>
+            )}
+
+            <button
+              onClick={handleProcessPayment}
+              disabled={!selectedPaymentMethod || paymentLoading || (selectedPaymentMethod.name.toUpperCase() === 'CASH' && !(parseFloat(cashReceived) >= total)) || (selectedPaymentMethod.name.toUpperCase() === 'CARD' && !cardTxnRef.trim())}
+              className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b8943f] text-black font-extrabold py-3.5 rounded-2xl transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+            >
+              {paymentLoading ? (
+                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <><Check size={16} /> Confirm Payment — ₹{total.toFixed(2)}</>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Receipt Modal ═══════════════════════════════════════════════════ */}
+      {showReceiptModal && lastOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-gray-900 border border-gray-700 max-w-sm w-full rounded-3xl p-6 shadow-2xl space-y-5 text-center">
+            <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto">
+              <Check size={28} className="text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="text-xl font-extrabold text-white">Payment Successful!</h3>
+              <p className="text-gray-400 text-sm mt-1">Order has been sent to the kitchen</p>
+            </div>
+            <div className="bg-gray-800/50 border border-gray-700/40 rounded-2xl p-4 text-sm space-y-2">
+              <div className="flex justify-between text-gray-400">
+                <span>Order #</span>
+                <span className="font-mono text-[#D4AF37] font-bold">{lastOrder.orderNumber || lastOrder.id}</span>
+              </div>
+              <div className="flex justify-between text-gray-400">
+                <span>Amount</span>
+                <span className="text-white font-bold">₹{total.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-400">
+                <span>Method</span>
+                <span className="text-white font-semibold">{lastOrder.paymentMethod}</span>
+              </div>
+              {selectedTable && (
+                <div className="flex justify-between text-gray-400">
+                  <span>Table</span>
+                  <span className="text-white font-semibold">{selectedTable.tableNumber}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handlePrintReceipt}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-700 text-white text-sm font-bold rounded-xl transition-all cursor-pointer"
+              >
+                <Printer size={15} /> Print
+              </button>
+              <button
+                onClick={() => setShowReceiptModal(false)}
+                className="flex-1 py-2.5 bg-gradient-to-r from-[#D4AF37] to-[#b8943f] text-black text-sm font-extrabold rounded-xl transition-all hover:opacity-90 cursor-pointer"
+              >
+                New Order
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed top-6 right-6 z-50 bg-emerald-950/90 border-2 border-emerald-400 text-emerald-100 px-6 py-4 rounded-2xl shadow-[0_10px_30px_rgba(16,185,129,0.3)] animate-bounce flex items-center gap-3">
+          <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping shrink-0" />
+          <span className="font-extrabold text-sm tracking-wide">{toastMsg}</span>
+          <button onClick={() => setToastMsg(null)} className="text-emerald-400 hover:text-white font-bold ml-2">×</button>
+        </div>
+      )}
     </div>
   );
 }

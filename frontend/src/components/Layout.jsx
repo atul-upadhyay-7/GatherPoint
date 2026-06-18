@@ -7,16 +7,39 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const navigation = [
-    { name: 'POS Terminal', href: '/pos', icon: '🛒' },
-    { name: 'Orders', href: '/orders', icon: '📋' },
-    { name: 'Customers', href: '/customers', icon: '👥' },
-    { name: 'Tables', href: '/tables', icon: '🪑' },
-    { name: 'Kitchen', href: '/kitchen', icon: '🍳' },
-    { name: 'Reports', href: '/reports', icon: '📊' },
-    { name: 'Session', href: '/session', icon: '🔐' },
-    { name: 'Admin', href: '/admin', icon: '⚙️', admin: true },
-  ];
+  const handleLogout = async () => {
+    await logout();
+    navigate('/staff-pos');
+  };
+
+  const getFilteredNavigation = () => {
+    if (user?.role === 'KITCHEN_STAFF') {
+      return [{ name: 'Kitchen Display', href: '/kitchen', icon: '🍳' }];
+    }
+    if (user?.role === 'EMPLOYEE') {
+      return [
+        { name: 'POS Terminal', href: '/pos', icon: '🛒' },
+        { name: 'Orders', href: '/orders', icon: '📋' },
+        { name: 'Customers', href: '/customers', icon: '👥' },
+        { name: 'Tables', href: '/tables', icon: '🪑' },
+        { name: 'Reports', href: '/reports', icon: '📊' },
+        { name: 'Session', href: '/session', icon: '🔐' },
+      ];
+    }
+    // ADMIN has access to all links
+    return [
+      { name: 'POS Terminal', href: '/pos', icon: '🛒' },
+      { name: 'Orders', href: '/orders', icon: '📋' },
+      { name: 'Customers', href: '/customers', icon: '👥' },
+      { name: 'Tables', href: '/tables', icon: '🪑' },
+      { name: 'Kitchen Display', href: '/kitchen', icon: '🍳' },
+      { name: 'Reports', href: '/reports', icon: '📊' },
+      { name: 'Session', href: '/session', icon: '🔐' },
+      { name: 'Admin Panel', href: '/admin', icon: '⚙️' },
+    ];
+  };
+
+  const navigation = getFilteredNavigation();
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex text-base">
