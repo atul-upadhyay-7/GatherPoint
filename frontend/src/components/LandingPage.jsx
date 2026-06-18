@@ -204,11 +204,12 @@ export default function LandingPage({ onEnter }) {
           {/* Dual Login Buttons - revealed after load */}
           <div 
             ref={buttonsRef}
-            className={`flex flex-col sm:flex-row gap-[13px] w-full justify-center ${!loadingComplete ? 'pointer-events-none' : ''}`}
+            className="flex flex-col sm:flex-row gap-[13px] w-full justify-center"
           >
             <button
+              type="button"
               onClick={() => navigate('/staff-pos')}
-              className="flex items-center justify-center gap-3 w-full sm:w-[190px] py-[104px] rounded-full bg-[#080d0a]/95 backdrop-blur-md border border-[#D4AF37]/80 text-[#D4AF37] font-cinzel text-[12px] tracking-[0.2em] font-bold uppercase hover:bg-[#D4AF37] hover:text-[#050505] shadow-[0_0_20px_rgba(212,175,55,0.25)] hover:shadow-[0_0_40px_rgba(212,175,55,0.5)] transition-all duration-500 transform hover:scale-105 active:scale-95 group cursor-pointer"
+              className="flex items-center justify-center gap-3 w-full sm:w-[190px] py-3.5 px-6 rounded-full bg-[#080d0a]/95 backdrop-blur-md border border-[#D4AF37]/80 text-[#D4AF37] font-cinzel text-[12px] tracking-[0.2em] font-bold uppercase hover:bg-[#D4AF37] hover:text-[#050505] shadow-[0_0_20px_rgba(212,175,55,0.25)] hover:shadow-[0_0_40px_rgba(212,175,55,0.5)] transition-all duration-500 transform hover:scale-105 active:scale-95 group cursor-pointer"
             >
               <Shield size={16} />
               ADMIN LOGIN
@@ -216,8 +217,9 @@ export default function LandingPage({ onEnter }) {
             </button>
 
             <button
+              type="button"
               onClick={() => navigate('/customer-order')}
-              className="flex items-center justify-center gap-3 w-full sm:w-[190px] py-[104px] rounded-full bg-[#080d0a]/95 backdrop-blur-md border border-[#D4AF37]/40 text-[#D4AF37]/80 font-cinzel text-[12px] tracking-[0.2em] font-bold uppercase hover:bg-[#D4AF37]/20 hover:text-[#FFF] hover:border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.1)] hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all duration-500 transform hover:scale-105 active:scale-95 group cursor-pointer"
+              className="flex items-center justify-center gap-3 w-full sm:w-[190px] py-3.5 px-6 rounded-full bg-[#080d0a]/95 backdrop-blur-md border border-[#D4AF37]/40 text-[#D4AF37]/80 font-cinzel text-[12px] tracking-[0.2em] font-bold uppercase hover:bg-[#D4AF37]/20 hover:text-[#FFF] hover:border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.1)] hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all duration-500 transform hover:scale-105 active:scale-95 group cursor-pointer"
             >
               <User size={16} />
               CUSTOMER

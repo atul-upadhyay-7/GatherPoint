@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useClerk } from '@clerk/clerk-react';
 import { gsap } from 'gsap';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import { validators } from '../utils/validators';
 import Logo from './customer/Logo';
 
+const GOOGLE_OAUTH_URL = 'http://localhost:8080/oauth2/authorization/google';
+
 export default function CustomerLoginPage() {
   const { login, signup } = useAuth();
   const navigate = useNavigate();
-  const clerk = useClerk();
 
   const [activeTab, setActiveTab] = useState('login');
   const [email, setEmail] = useState('');
@@ -117,13 +117,7 @@ export default function CustomerLoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    if (clerk && clerk.openSignIn) {
-      clerk.openSignIn({
-        redirectUrl: '/'
-      });
-    } else {
-      setErrorMsg('Google login via Clerk is currently initializing. Please try again.');
-    }
+    window.location.href = GOOGLE_OAUTH_URL;
   };
 
   return (

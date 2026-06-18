@@ -9,6 +9,8 @@ import AccessDenied from './components/AccessDenied';
 // ── Auth pages ─────────────────────────────────────────────────────────────────
 import StaffPosLogin from './components/StaffPosLogin';
 import CustomerLoginPage from './components/CustomerLoginPage';
+import OAuth2RedirectHandler from './components/OAuth2RedirectHandler';
+import OAuth2ErrorPage from './components/OAuth2ErrorPage';
 
 // ── Staff pages (old Layout wrapper) ──────────────────────────────────────────
 import PosTerminal from './components/PosTerminal';
@@ -65,8 +67,11 @@ const LoadingSpinner = () => (
 // ─────────────────────────────────────────────────────────────────────────────
 const StaffPosGate = () => {
   const { user, loading } = useAuth();
+
   if (loading) return <LoadingSpinner />;
-  if (user)    return <Navigate to={roleHome(user.role)} replace />;
+
+  if (user) return <Navigate to={roleHome(user.role)} replace />;
+
   return <StaffPosLogin />;
 };
 
@@ -87,8 +92,6 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 export default function App() {
   const { user, loading } = useAuth();
 
-  if (loading) return <LoadingSpinner />;
-
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
@@ -99,10 +102,16 @@ export default function App() {
         {/* Customer login (Clerk or email) */}
         <Route
           path="/login"
-          element={user ? <Navigate to="/" replace /> : <CustomerLoginPage />}
+          element={loading ? <LoadingSpinner /> : !user ? <CustomerLoginPage /> : <Navigate to="/" replace />}
         />
 
-        {/* Staff / admin login — Clerk renders here */}
+        {/* OAuth2 redirect — handles token from backend */}
+        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
+
+        {/* OAuth2 error — user not found in DB */}
+        <Route path="/oauth2/error" element={<OAuth2ErrorPage />} />
+
+        {/* Staff / admin login */}
         <Route path="/staff-pos" element={<StaffPosGate />} />
 
         {/* ── Staff routes (EMPLOYEE or ADMIN) ─────────────────────────── */}

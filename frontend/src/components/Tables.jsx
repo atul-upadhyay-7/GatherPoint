@@ -1,12 +1,24 @@
 import { useState, useEffect } from 'react';
 import ApiService from '../services/apiService';
 import { Plus, Edit2, Trash2, Home, Grid, Check, X, ShieldAlert, Users } from 'lucide-react';
+import { demoFloors, demoTables } from '../data/demoData';
+import { DemoBadge } from './PageHeader';
+
+const demoFloorsApi = demoFloors.map(({ id, name }) => ({ id, name }));
+const demoTablesApi = demoTables.map((t) => ({
+  id: t.id,
+  tableNumber: t.tableNumber,
+  seats: t.seats,
+  active: t.status === 'available' || t.status === 'reserved',
+  floor: { id: demoFloors.find((f) => f.name === t.floor)?.id || 1, name: t.floor },
+}));
 
 export default function Tables() {
   const [floors, setFloors] = useState([]);
   const [tables, setTables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [usingDemo, setUsingDemo] = useState(false);
 
   // Form states
   const [showFloorModal, setShowFloorModal] = useState(false);
@@ -28,11 +40,22 @@ export default function Tables() {
         ApiService.getFloors(),
         ApiService.getTables(),
       ]);
-      setFloors(Array.isArray(floorsData) ? floorsData : []);
-      setTables(Array.isArray(tablesData) ? tablesData : []);
+      const floorsList = Array.isArray(floorsData) ? floorsData : [];
+      const tablesList = Array.isArray(tablesData) ? tablesData : [];
+      if (floorsList.length === 0 && tablesList.length === 0) {
+        setFloors(demoFloorsApi);
+        setTables(demoTablesApi);
+        setUsingDemo(true);
+      } else {
+        setFloors(floorsList);
+        setTables(tablesList);
+        setUsingDemo(false);
+      }
     } catch (err) {
       console.error(err);
-      setErrorMsg('Failed to load floors and tables.');
+      setFloors(demoFloorsApi);
+      setTables(demoTablesApi);
+      setUsingDemo(true);
     } finally {
       setLoading(false);
     }
@@ -123,14 +146,15 @@ export default function Tables() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF2B2] via-[#D4AF37] to-[#8A6623]">
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF2B2] via-[#D4AF37] to-[#8A6623]">
             Floors & Tables
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Configure layout, floors, and table capacities for Odoo Cafe</p>
+          <p className="text-gray-400 text-base mt-2">Configure layout, floors, and table capacities</p>
         </div>
+        {usingDemo && <DemoBadge />}
       </div>
 
       {errorMsg && (

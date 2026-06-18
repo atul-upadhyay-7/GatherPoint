@@ -44,4 +44,11 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items;
+
+    private boolean offline;
+
+    private String offlineReference;
+
+    @ManyToOne
+    private PosSession posSession;
 }

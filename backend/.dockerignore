@@ -1,0 +1,10 @@
+target/
+.idea/
+*.md
+.git/
+.gitignore
+.env
+token.txt
+.mvn/
+mvnw
+mvnw.cmd

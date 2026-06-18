@@ -1,9 +1,11 @@
 package com.GatherPoint.backend.controller;
 
+import com.GatherPoint.backend.Constants.Role;
+import com.GatherPoint.backend.Mapper.EmployeeMapper;
 import com.GatherPoint.backend.Model.User;
 import com.GatherPoint.backend.Repo.UserRepo;
+import com.GatherPoint.backend.dto.Response.EmployeeResponse;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +20,16 @@ import java.util.Optional;
 public class EmployeeController {
 
     private final UserRepo userRepo;
-
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping
-    public List<User> getAllEmployees() {
-        return userRepo.findAll();
+    public List<EmployeeResponse> getAllEmployees() {
+        return userRepo.findAll().stream()
+                .filter(u -> u.getRole() == Role.EMPLOYEE
+                        || u.getRole() == Role.KITCHEN_STAFF
+                        || u.getRole() == Role.ADMIN)
+                .map(EmployeeMapper::toResponse)
+                .toList();
     }
 
     @PostMapping
@@ -33,8 +39,39 @@ public class EmployeeController {
         }
         employee.setPassword(passwordEncoder.encode(employee.getPassword()));
         employee.setActive(true);
+        if (!employee.isAllowOfflineSelling() && employee.getRole() != Role.ADMIN) {
+            employee.setAllowOfflineSelling(true);
+        }
         User saved = userRepo.save(employee);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(EmployeeMapper.toResponse(saved));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateEmployee(@PathVariable Long id, @RequestBody User updates) {
+        Optional<User> opt = userRepo.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+
+        User user = opt.get();
+        if (updates.getName() != null) user.setName(updates.getName());
+        if (updates.getEmail() != null) user.setEmail(updates.getEmail());
+        if (updates.getRole() != null) user.setRole(updates.getRole());
+        user.setActive(updates.isActive());
+        user.setAllowOfflineSelling(updates.isAllowOfflineSelling());
+
+        User saved = userRepo.save(user);
+        return ResponseEntity.ok(EmployeeMapper.toResponse(saved));
+    }
+
+    @PatchMapping("/{id}/offline-selling")
+    public ResponseEntity<?> toggleOfflineSelling(@PathVariable Long id, @RequestBody Map<String, Boolean> body) {
+        Optional<User> opt = userRepo.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+
+        User user = opt.get();
+        Boolean enabled = body.get("enabled");
+        user.setAllowOfflineSelling(enabled != null ? enabled : !user.isAllowOfflineSelling());
+        User saved = userRepo.save(user);
+        return ResponseEntity.ok(EmployeeMapper.toResponse(saved));
     }
 
     @PutMapping("/{id}/password")
@@ -60,10 +97,10 @@ public class EmployeeController {
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
         User user = opt.get();
-        user.setActive(!user.isActive()); // toggle active status (archive/unarchive)
+        user.setActive(!user.isActive());
         User saved = userRepo.save(user);
 
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(EmployeeMapper.toResponse(saved));
     }
 
     @DeleteMapping("/{id}")

@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import ApiService from '../services/apiService';
 import { Calendar, User, DollarSign, Clock, Search, Eye, Mail, Printer, Check, X, ShieldAlert } from 'lucide-react';
+import { demoOrders } from '../data/demoData';
+import { DemoBadge } from './PageHeader';
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -19,16 +21,25 @@ export default function Orders() {
   const [emailInput, setEmailInput] = useState('');
   const [emailSuccess, setEmailSuccess] = useState('');
   const [emailLoading, setEmailLoading] = useState(false);
+  const [usingDemo, setUsingDemo] = useState(false);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
       setErrorMsg('');
       const data = await ApiService.getOrders();
-      setOrders(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      if (list.length === 0) {
+        setOrders(demoOrders);
+        setUsingDemo(true);
+      } else {
+        setOrders(list);
+        setUsingDemo(false);
+      }
     } catch (err) {
       console.error(err);
-      setErrorMsg('Failed to load orders history.');
+      setOrders(demoOrders);
+      setUsingDemo(true);
     } finally {
       setLoading(false);
     }
@@ -129,14 +140,15 @@ export default function Orders() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF2B2] via-[#D4AF37] to-[#8A6623]">
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF2B2] via-[#D4AF37] to-[#8A6623]">
             Orders History
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Search past order receipts, verify payments, and reprint bills</p>
+          <p className="text-gray-400 text-base mt-2">Search past order receipts, verify payments, and reprint bills</p>
         </div>
+        {usingDemo && <DemoBadge />}
       </div>
 
       {errorMsg && (
@@ -147,12 +159,12 @@ export default function Orders() {
       )}
 
       {/* Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-gray-800/40 p-4 rounded-3xl border border-gray-700/40">
+      <div className="flex flex-col md:flex-row gap-5 justify-between items-center bg-gray-800/40 p-5 rounded-3xl border border-gray-700/40">
         <div className="relative w-full md:max-w-md">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
-            className="w-full bg-gray-900 border border-gray-700 rounded-2xl py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#D4AF37] transition-all text-sm"
+            className="w-full bg-gray-900 border border-gray-700 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#D4AF37] transition-all text-base"
             placeholder="Search by Order #, Table, Customer..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -164,7 +176,7 @@ export default function Orders() {
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-5 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                 statusFilter === st
                   ? 'bg-[#cfad56] text-black'
                   : 'bg-gray-900/60 border border-gray-700/50 text-gray-400 hover:text-white'
@@ -191,12 +203,12 @@ export default function Orders() {
       ) : (
         <div className="bg-gray-800/30 border border-gray-700/50 rounded-3xl overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
+            <table className="w-full text-left text-base border-collapse">
               <thead>
-                <tr className="border-b border-gray-700/40 text-gray-400 font-bold uppercase text-[10px] tracking-wider bg-gray-800/50">
-                  <th className="py-4 px-6">Order Number</th>
-                  <th className="py-4 px-4">Date & Time</th>
-                  <th className="py-4 px-4">Table</th>
+                <tr className="border-b border-gray-700/40 text-gray-400 font-bold uppercase text-xs tracking-wider bg-gray-800/50">
+                  <th className="py-4 px-7">Order Number</th>
+                  <th className="py-4 px-5">Date & Time</th>
+                  <th className="py-4 px-5">Table</th>
                   <th className="py-4 px-4">Customer</th>
                   <th className="py-4 px-4">Cashier</th>
                   <th className="py-4 px-4 text-right">Amount</th>

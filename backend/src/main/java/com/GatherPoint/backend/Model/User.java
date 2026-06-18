@@ -27,4 +27,7 @@ public class User {
     private Role role;
 
     private boolean active;
+
+    @Builder.Default
+    private boolean allowOfflineSelling = true;
 }

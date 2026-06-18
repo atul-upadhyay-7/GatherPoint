@@ -1,151 +1,113 @@
-﻿import { useState, useEffect, useRef } from 'react';
-import { useAuth as useClerkAuth, useUser as useClerkUser, useClerk } from '@clerk/clerk-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import AuthService from '../services/authService';
 
+const AUTH_EVENT = 'auth-state-changed';
+const listeners = new Set();
+let sharedUser = (() => {
+  try {
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    localStorage.removeItem('user');
+    return null;
+  }
+})();
+let sharedToken = localStorage.getItem('token');
+let sharedLoading = false;
+
+function broadcast() {
+  listeners.forEach(fn => fn());
+}
+
+/**
+ * Re-reads auth data from localStorage and syncs module-level state.
+ * Call this after writing auth data to localStorage outside of useAuth
+ * (e.g. from OAuth2RedirectHandler).
+ */
+export function syncAuthState() {
+  try {
+    const stored = localStorage.getItem('user');
+    sharedUser = stored ? JSON.parse(stored) : null;
+  } catch {
+    localStorage.removeItem('user');
+    sharedUser = null;
+  }
+  sharedToken = localStorage.getItem('token');
+  sharedLoading = false;
+  broadcast();
+}
+
 export default function useAuth() {
-  const { isSignedIn, isLoaded: clerkLoaded } = useClerkAuth();
-  const { user: clerkUser } = useClerkUser();
-  const { signOut } = useClerk();
+  const [, forceUpdate] = useState(0);
+  const mountedRef = useRef(true);
 
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Keep refs to avoid stale-closure issues in the one-shot init effect
-  const isSignedInRef = useRef(isSignedIn);
-  const clerkUserRef = useRef(clerkUser);
-  const signOutRef = useRef(signOut);
-
-  // Sync refs when Clerk reactive values change (does NOT re-run init)
-  useEffect(() => { isSignedInRef.current = isSignedIn; }, [isSignedIn]);
-  useEffect(() => { clerkUserRef.current = clerkUser; }, [clerkUser]);
-  useEffect(() => { signOutRef.current = signOut; }, [signOut]);
-
-  // ΓöÇΓöÇ One-shot init: runs ONCE when Clerk finishes loading ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   useEffect(() => {
-    if (!clerkLoaded) return;
-
-    const init = async () => {
-      try {
-        const signedIn = isSignedInRef.current;
-        const cUser = clerkUserRef.current;
-
-        if (signedIn && cUser) {
-          const email = cUser.primaryEmailAddress?.emailAddress;
-          const name = cUser.fullName || 'Staff User';
-
-          if (email) {
-            try {
-              const userData = await AuthService.clerkLogin(email, name);
-              AuthService.setUser(userData);
-              setUser(userData);
-              setToken(userData.token);
-              localStorage.setItem('token', userData.token);
-            } catch (clerkErr) {
-              // Clerk account not registered in this backend ΓåÆ force sign-out
-              console.warn('Clerk user not in backend, signing out:', clerkErr.message);
-              try { if (signOutRef.current) await signOutRef.current(); } catch (_) { /* ignore */ }
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              setUser(null);
-              setToken(null);
-            }
-          }
-        } else {
-          // Standard JWT path
-          const storedToken = localStorage.getItem('token');
-          if (storedToken) {
-            try {
-              const currentUser = await AuthService.getCurrentUser();
-              if (currentUser) {
-                setUser(currentUser);
-                setToken(storedToken);
-              } else {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                setUser(null);
-                setToken(null);
-              }
-            } catch {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              setUser(null);
-              setToken(null);
-            }
-          } else {
-            setUser(null);
-            setToken(null);
-          }
-        }
-      } catch (err) {
-        console.error('Auth init error:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+    const listener = () => {
+      if (mountedRef.current) forceUpdate(n => n + 1);
     };
+    listeners.add(listener);
+    return () => {
+      mountedRef.current = false;
+      listeners.delete(listener);
+    };
+  }, []);
 
-    init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clerkLoaded]); // ΓåÉ only clerkLoaded, no other deps ΓåÆ runs once
-
-  // ΓöÇΓöÇ Actions ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-
-  const login = async (email, password, role) => {
-    setLoading(true);
+  const login = useCallback(async (email, password, role) => {
+    sharedLoading = true;
+    broadcast();
     try {
       const userData = await AuthService.login(email, password, role);
       AuthService.setUser(userData);
-      setUser(userData);
-      setToken(userData.token);
       localStorage.setItem('token', userData.token);
-      setError(null);
+      sharedUser = userData;
+      sharedToken = userData.token;
+      sharedLoading = false;
+      broadcast();
       return userData;
     } catch (err) {
-      setError(err.message);
+      sharedLoading = false;
+      broadcast();
       throw err;
-    } finally {
-      setLoading(false);
     }
-  };
+  }, []);
 
-  const signup = async (name, email, password, role) => {
-    setLoading(true);
+  const signup = useCallback(async (name, email, password, role) => {
+    sharedLoading = true;
+    broadcast();
     try {
       const userData = await AuthService.signup(name, email, password, role);
       AuthService.setUser(userData);
-      setUser(userData);
-      setToken(userData.token);
       localStorage.setItem('token', userData.token);
-      setError(null);
+      sharedUser = userData;
+      sharedToken = userData.token;
+      sharedLoading = false;
+      broadcast();
       return userData;
     } catch (err) {
-      setError(err.message);
+      sharedLoading = false;
+      broadcast();
       throw err;
-    } finally {
-      setLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
-    try { if (isSignedInRef.current && signOutRef.current) await signOutRef.current(); } catch (_) { /* ignore */ }
+  const logout = useCallback(async () => {
     AuthService.logout();
-    setUser(null);
-    setToken(null);
-    setError(null);
-  };
+    sharedUser = null;
+    sharedToken = null;
+    sharedLoading = false;
+    broadcast();
+  }, []);
 
   return {
-    user,
-    token,
-    loading,
-    error,
+    user: sharedUser,
+    token: sharedToken,
+    loading: sharedLoading,
+    error: null,
     login,
     signup,
     logout,
-    getToken: () => token || localStorage.getItem('token'),
-    isAuthenticated: !!user,
-    isLoading: loading,
+    getToken: () => sharedToken || localStorage.getItem('token'),
+    isAuthenticated: !!sharedUser,
+    isLoading: sharedLoading,
   };
 }
