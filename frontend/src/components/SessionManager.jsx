@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import ApiService from '../services/apiService';
 import useAuth from '../hooks/useAuth';
 import { Play, Lock, Unlock, Calendar, DollarSign, History, User, Clock, ShieldAlert, CheckCircle } from 'lucide-react';
+import { demoSession, demoSessionHistory } from '../data/demoData';
+import { DemoBadge } from './PageHeader';
 
 export default function SessionManager() {
   const { user } = useAuth();
@@ -15,6 +17,7 @@ export default function SessionManager() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [usingDemo, setUsingDemo] = useState(false);
 
   const fetchActiveSession = async () => {
     try {
@@ -23,12 +26,15 @@ export default function SessionManager() {
       const session = await ApiService.getActiveSession();
       if (session && session.id) {
         setActiveSession(session);
+        setUsingDemo(false);
       } else {
-        setActiveSession(null);
+        setActiveSession(demoSession);
+        setUsingDemo(true);
       }
     } catch (err) {
       console.error(err);
-      setErrorMsg('Failed to check active session status.');
+      setActiveSession(demoSession);
+      setUsingDemo(true);
     } finally {
       setLoadingActive(false);
     }
@@ -38,9 +44,11 @@ export default function SessionManager() {
     try {
       setLoadingHistory(true);
       const data = await ApiService.getSessionHistory();
-      setHistory(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setHistory(list.length ? list : demoSessionHistory);
     } catch (err) {
       console.error(err);
+      setHistory(demoSessionHistory);
     } finally {
       setLoadingHistory(false);
     }
@@ -101,25 +109,28 @@ export default function SessionManager() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF2B2] via-[#D4AF37] to-[#8A6623]">
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF2B2] via-[#D4AF37] to-[#8A6623]">
             Session Management
           </h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="text-gray-400 text-base mt-2">
             Open or close your register shift and review session logs
           </p>
         </div>
-        {activeSession ? (
-          <span className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-xs font-bold uppercase tracking-widest animate-pulse">
-            <Unlock size={14} /> Active Session Open
-          </span>
-        ) : (
-          <span className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-full text-xs font-bold uppercase tracking-widest">
-            <Lock size={14} /> Session Closed
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {usingDemo && <DemoBadge />}
+          {activeSession ? (
+            <span className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-xs font-bold uppercase tracking-widest animate-pulse">
+              <Unlock size={14} /> Active Session Open
+            </span>
+          ) : (
+            <span className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-full text-xs font-bold uppercase tracking-widest">
+              <Lock size={14} /> Session Closed
+            </span>
+          )}
+        </div>
       </div>
 
       {errorMsg && (

@@ -45,6 +45,10 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<Payment> payments;
+    private boolean offline;
+
+    private String offlineReference;
+
+    @ManyToOne
+    private PosSession posSession;
 }

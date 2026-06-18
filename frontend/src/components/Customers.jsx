@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import ApiService from '../services/apiService';
 import { Plus, Edit2, Trash2, Search, User, Mail, Phone, Check, X, ShieldAlert } from 'lucide-react';
+import { demoCustomers } from '../data/demoData';
+import { DemoBadge } from './PageHeader';
 
 const GlassCard = ({ children, className = '' }) => (
   <div className={`bg-[#0A261C]/50 backdrop-blur-xl border border-[#D4A373]/15 rounded-2xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] ${className}`}>
@@ -13,6 +15,7 @@ export default function Customers() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [usingDemo, setUsingDemo] = useState(false);
 
   // Form modals state
   const [showModal, setShowModal] = useState(false);
@@ -26,10 +29,13 @@ export default function Customers() {
       setLoading(true);
       setErrorMsg('');
       const data = await ApiService.getCustomers();
-      setCustomers(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setCustomers(list.length ? list : demoCustomers);
+      setUsingDemo(list.length === 0);
     } catch (err) {
       console.error(err);
-      setErrorMsg('Failed to load customers directory.');
+      setCustomers(demoCustomers);
+      setUsingDemo(true);
     } finally {
       setLoading(false);
     }
@@ -84,23 +90,23 @@ export default function Customers() {
   );
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#FAF8F1] tracking-wide font-cinzel">
-            Customers <span className="text-[#D4A373]">Directory</span>
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF2B2] via-[#D4AF37] to-[#8A6623]">
+            Customers Directory
           </h1>
-          <p className="text-gray-400 text-sm mt-1.5 font-sans">
-            Manage customer profiles and contacts for receipt email distribution.
-          </p>
+          <p className="text-gray-400 text-base mt-2">Manage customer profiles and contacts for email receipts</p>
         </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 bg-[#D4A373] text-[#071B14] px-5 py-3 rounded-xl font-bold hover:bg-[#FAF8F1] hover:text-[#071B14] active:scale-95 transition-all duration-200 shadow-[0_0_20px_rgba(212,163,115,0.25)] cursor-pointer text-sm"
-        >
-          <Plus size={16} /> Add Customer
-        </button>
+        <div className="flex items-center gap-3">
+          {usingDemo && <DemoBadge />}
+          <button
+            onClick={() => handleOpenModal()}
+            className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-black bg-[#cfad56] hover:bg-[#b8943f] px-5 py-3 rounded-xl transition-all cursor-pointer shadow-md"
+          >
+            <Plus size={14} /> Add Customer
+          </button>
+        </div>
       </div>
 
       {errorMsg && (

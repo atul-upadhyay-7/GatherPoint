@@ -12,4 +12,5 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     List<Order> findByOrderNumberContainingIgnoreCase(String orderNumber);
     Optional<Order> findByOrderNumber(String orderNumber);
     List<Order> findByEmployeeId(Long employeeId);
+    Optional<Order> findByOfflineReference(String offlineReference);
 }

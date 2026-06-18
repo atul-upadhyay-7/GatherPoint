@@ -3,7 +3,6 @@ package com.GatherPoint.backend.controller;
 import com.GatherPoint.backend.Model.User;
 import com.GatherPoint.backend.Repo.UserRepo;
 import com.GatherPoint.backend.Security.JwtUtil;
-import com.GatherPoint.backend.dto.Request.ClerkLoginRequest;
 import com.GatherPoint.backend.dto.Request.LoginRequest;
 import com.GatherPoint.backend.dto.Request.RefreshTokenRequest;
 import com.GatherPoint.backend.dto.Request.SignupRequest;
@@ -63,50 +62,6 @@ public class AuthController {
         User user = userOpt.get();
         if (!user.isActive()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User account is inactive!");
-        }
-
-        String token = jwtUtil.generateToken(user.getEmail());
-
-        return ResponseEntity.ok(new AuthResponse(
-                token,
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getRole(),
-                user.isActive()
-        ));
-    }
-
-    @PostMapping("/clerk-login")
-    public ResponseEntity<?> clerkLogin(@RequestBody ClerkLoginRequest request) {
-        Optional<User> userOpt = userRepo.findByEmail(request.getEmail());
-        User user;
-        
-        com.GatherPoint.backend.Constants.Role requestedRole = com.GatherPoint.backend.Constants.Role.EMPLOYEE;
-        if (request.getRole() != null) {
-            try {
-                requestedRole = com.GatherPoint.backend.Constants.Role.valueOf(request.getRole());
-            } catch (IllegalArgumentException e) {
-                // Keep default EMPLOYEE
-            }
-        }
-
-        if (userOpt.isEmpty()) {
-            user = User.builder()
-                    .name(request.getName())
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(java.util.UUID.randomUUID().toString()))
-                    .role(requestedRole)
-                    .active(true)
-                    .build();
-            user = userRepo.save(user);
-        } else {
-            user = userOpt.get();
-            // Update role to match requested role for testing/demo purposes
-            if (request.getRole() != null && user.getRole() != requestedRole) {
-                user.setRole(requestedRole);
-                user = userRepo.save(user);
-            }
         }
 
         String token = jwtUtil.generateToken(user.getEmail());

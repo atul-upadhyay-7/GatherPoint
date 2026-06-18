@@ -1,7 +1,8 @@
 package com.GatherPoint.backend.config;
 
 import com.GatherPoint.backend.Security.JwtFilter;
-import com.GatherPoint.backend.Security.ClerkAuthenticationConverter;
+import com.GatherPoint.backend.Security.JwtUtil;
+import com.GatherPoint.backend.Security.OAuth2LoginSuccessHandler;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,7 +33,8 @@ import jakarta.servlet.http.HttpServletRequest;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    private final ClerkAuthenticationConverter clerkAuthenticationConverter;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final JwtUtil jwtUtil;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -41,17 +43,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/signup", "/api/auth/refresh", "/api/auth/clerk-login").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/signup", "/api/auth/refresh").permitAll()
                 .requestMatchers("/ws/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .bearerTokenResolver(bearerTokenResolver())
-                .jwt(jwt -> jwt
-                    .jwtAuthenticationConverter(clerkAuthenticationConverter)
-                )
+            .oauth2Login(oauth2 -> oauth2
+                .successHandler(oAuth2LoginSuccessHandler)
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -75,7 +74,7 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
         configuration.setAllowedMethods(Arrays.asList("*"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(false);
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

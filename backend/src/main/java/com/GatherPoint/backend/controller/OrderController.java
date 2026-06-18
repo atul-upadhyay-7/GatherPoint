@@ -30,6 +30,7 @@ public class OrderController {
     private final RestaurantTableRepo tableRepo;
     private final UserRepo userRepo;
     private final KitchenTicketRepo kitchenTicketRepo;
+    private final PosSessionRepo sessionRepo;
     private final SimpMessagingTemplate messagingTemplate;
 
     private User getLoggedInUser() {
@@ -78,6 +79,14 @@ public class OrderController {
             orderInput.setStatus(OrderStatus.DRAFT);
         }
 
+        sessionRepo.findByEmployeeIdAndClosedAtIsNull(loggedInUser.getId())
+                .ifPresent(orderInput::setPosSession);
+
+        if (orderInput.isOffline() && !loggedInUser.isAllowOfflineSelling()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Offline selling is disabled for this employee");
+        }
+
         if (orderInput.getOrderNumber() == null || orderInput.getOrderNumber().isEmpty()) {
             orderInput.setOrderNumber("ORD-" + System.currentTimeMillis());
         }
@@ -95,6 +104,62 @@ public class OrderController {
 
         Order savedOrder = orderRepo.save(orderInput);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
+    }
+
+    @PostMapping("/sync-offline")
+    public ResponseEntity<?> syncOfflineOrders(@RequestBody List<Order> offlineOrders) {
+        User loggedInUser = getLoggedInUser();
+        if (loggedInUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+        if (!loggedInUser.isAllowOfflineSelling()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Offline selling is disabled for this employee");
+        }
+
+        List<Order> synced = new ArrayList<>();
+        for (Order incoming : offlineOrders) {
+            if (incoming.getOfflineReference() != null) {
+                Optional<Order> existing = orderRepo.findByOfflineReference(incoming.getOfflineReference());
+                if (existing.isPresent()) {
+                    synced.add(existing.get());
+                    continue;
+                }
+            }
+
+            incoming.setEmployee(loggedInUser);
+            incoming.setOffline(false);
+            incoming.setCreatedAt(incoming.getCreatedAt() != null ? incoming.getCreatedAt() : LocalDateTime.now());
+            if (incoming.getStatus() == null) {
+                incoming.setStatus(OrderStatus.PAID);
+            }
+            if (incoming.getOrderNumber() == null || incoming.getOrderNumber().isEmpty()) {
+                incoming.setOrderNumber("ORD-" + System.currentTimeMillis());
+            }
+
+            sessionRepo.findByEmployeeIdAndClosedAtIsNull(loggedInUser.getId())
+                    .ifPresent(incoming::setPosSession);
+
+            if (incoming.getTable() != null && incoming.getTable().getId() != null) {
+                tableRepo.findById(incoming.getTable().getId()).ifPresent(incoming::setTable);
+            }
+
+            if (incoming.getItems() != null) {
+                for (OrderItem item : incoming.getItems()) {
+                    item.setOrder(incoming);
+                    if (item.getProduct() != null && item.getProduct().getId() != null) {
+                        productRepo.findById(item.getProduct().getId()).ifPresent(item::setProduct);
+                    }
+                }
+            }
+
+            synced.add(orderRepo.save(incoming));
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "syncedCount", synced.size(),
+                "orders", synced
+        ));
     }
 
     @PutMapping("/{id}")

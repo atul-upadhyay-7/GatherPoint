@@ -1,175 +1,168 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState } from 'react';
 import {
-  TrendingUp, ShoppingBag, DollarSign, BarChart3, Download,
-  Calendar, Filter, ChevronDown, Clock, Award, ArrowUp, ArrowDown
+  TrendingUp, ShoppingBag, Users, DollarSign, Download,
+  BarChart3, CreditCard, Banknote, Smartphone,
 } from 'lucide-react';
-import ApiService from '../services/apiService';
+import PageHeader, { StatCard, DemoBadge, FilterButton } from './PageHeader';
+import { demoReportStats } from '../data/demoData';
 
-const DATE_RANGES = [
-  { label: 'Today', value: 'today' },
-  { label: 'This Week', value: 'week' },
-  { label: 'This Month', value: 'month' },
-  { label: 'All Time', value: 'all' },
+const PERIODS = [
+  { id: 'today', label: 'Today' },
+  { id: 'week', label: 'This Week' },
+  { id: 'month', label: 'This Month' },
 ];
 
-function getDateBounds(range) {
-  const now = new Date();
-  const start = new Date(now);
-  if (range === 'today') { start.setHours(0, 0, 0, 0); }
-  else if (range === 'week') { start.setDate(now.getDate() - 7); }
-  else if (range === 'month') { start.setDate(1); start.setHours(0, 0, 0, 0); }
-  else { return { start: null, end: null }; }
-  return { start, end: now };
-}
-
-function KpiCard({ icon: Icon, title, value, sub, trend, color = '#D4AF37' }) {
-  return (
-    <div className="bg-gray-800/40 border border-gray-700/50 rounded-3xl p-5 space-y-3 hover:border-gray-600/60 transition-all">
-      <div className="flex items-center justify-between">
-        <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
-          <Icon size={18} style={{ color }} />
-        </div>
-        {trend !== undefined && (
-          <span className={`flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-full ${
-            trend >= 0
-              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-              : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-          }`}>
-            {trend >= 0 ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
-            {Math.abs(trend)}%
-          </span>
-        )}
-      </div>
-      <div>
-        <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{title}</p>
-        <p className="text-2xl font-extrabold text-white mt-1">{value}</p>
-        {sub && <p className="text-gray-500 text-xs mt-0.5">{sub}</p>}
-      </div>
-    </div>
-  );
-}
+const PAYMENT_ICONS = { CASH: Banknote, CARD: CreditCard, UPI: Smartphone };
+const PAYMENT_COLORS = { CASH: 'bg-emerald-500', CARD: 'bg-blue-500', UPI: 'bg-purple-500' };
 
 export default function Reports() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState('month');
-  const [errorMsg, setErrorMsg] = useState('');
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-        const data = await ApiService.getOrders();
-        setOrders(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error(err);
-        setErrorMsg('Failed to load report data.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
-
-  // Filter orders by date range
-  const filteredOrders = useMemo(() => {
-    const { start, end } = getDateBounds(dateRange);
-    if (!start) return orders;
-    return orders.filter(o => {
-      const d = new Date(o.createdAt);
-      return d >= start && d <= end;
-    });
-  }, [orders, dateRange]);
-
-  // KPIs
-  const paidOrders = filteredOrders.filter(o => o.status === 'PAID');
-  const totalRevenue = paidOrders.reduce((s, o) => s + (o.total || o.totalAmount || 0), 0);
-  const totalOrders = filteredOrders.length;
-  const avgOrderValue = paidOrders.length > 0 ? totalRevenue / paidOrders.length : 0;
-  const cancelledCount = filteredOrders.filter(o => o.status === 'CANCELLED').length;
-
-  // Revenue by day (last 7 or 30 days based on range)
-  const chartDays = dateRange === 'today' ? 24 : dateRange === 'week' ? 7 : dateRange === 'month' ? 30 : 30;
-  const revenueByDay = useMemo(() => {
-    const map = {};
-    paidOrders.forEach(o => {
-      const d = new Date(o.createdAt);
-      const key = dateRange === 'today'
-        ? `${d.getHours()}:00`
-        : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-      map[key] = (map[key] || 0) + (o.total || o.totalAmount || 0);
-    });
-    return map;
-  }, [paidOrders, dateRange]);
-
-  const chartKeys = Object.keys(revenueByDay).slice(-chartDays);
-  const chartValues = chartKeys.map(k => revenueByDay[k] || 0);
-  const maxVal = Math.max(...chartValues, 1);
-  const chartW = 800;
-  const chartH = 180;
-  const pts = chartValues.map((v, i) => ({
-    x: chartValues.length > 1 ? (i / (chartValues.length - 1)) * chartW : chartW / 2,
-    y: chartH - (v / maxVal) * chartH * 0.85,
-  }));
-  const linePath = pts.length > 1 ? `M ${pts.map(p => `${p.x},${p.y}`).join(' L ')}` : '';
-  const areaPath = pts.length > 1 ? `${linePath} L ${chartW},${chartH} L 0,${chartH} Z` : '';
-
-  // Status breakdown
-  const statusCounts = {
-    PAID: paidOrders.length,
-    DRAFT: filteredOrders.filter(o => o.status === 'DRAFT').length,
-    CANCELLED: cancelledCount,
-  };
-
-  // Top products
-  const productMap = {};
-  filteredOrders.forEach(order => {
-    (order.items || []).forEach(item => {
-      const name = item.product?.productName || item.productName || 'Unknown';
-      if (!productMap[name]) productMap[name] = { revenue: 0, qty: 0 };
-      productMap[name].revenue += item.totalPrice || 0;
-      productMap[name].qty += item.quantity || 0;
-    });
-  });
-  const topProducts = Object.entries(productMap)
-    .sort((a, b) => b[1].revenue - a[1].revenue)
-    .slice(0, 5);
+  const [period, setPeriod] = useState('today');
+  const stats = demoReportStats[period];
+  const maxHourly = Math.max(...(stats.hourlySales?.map((h) => h.amount) || [1]));
+  const totalPayments = Object.values(stats.paymentBreakdown).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
+      <PageHeader
+        title="Reports & Analytics"
+        subtitle="Track revenue, orders, and business performance at a glance"
+        actions={
+          <>
+            <DemoBadge />
+            <button className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-800 border border-gray-700 text-gray-300 hover:text-white text-sm font-bold transition-all cursor-pointer">
+              <Download size={18} /> Export
+            </button>
+          </>
+        }
+      />
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF2B2] via-[#D4AF37] to-[#8A6623]">
-            Reports & Analytics
-          </h1>
-          <p className="text-gray-400 text-sm mt-1">Business insights, revenue breakdown and order trends</p>
+      <div className="flex gap-3">
+        {PERIODS.map((p) => (
+          <FilterButton key={p.id} active={period === p.id} onClick={() => setPeriod(p.id)}>
+            {p.label}
+          </FilterButton>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
+        <StatCard label="Total Revenue" value={`₹${stats.totalRevenue.toLocaleString()}`} icon={TrendingUp} color="gold" />
+        <StatCard label="Total Orders" value={stats.orderCount} icon={ShoppingBag} color="green" />
+        <StatCard label="Avg Order Value" value={`₹${stats.averageOrderValue.toFixed(0)}`} icon={DollarSign} color="blue" />
+        <StatCard label="Customers Served" value={stats.customerCount} icon={Users} color="rose" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
+        <div className="bg-gray-800/30 border border-gray-700/50 rounded-3xl p-7">
+          <h2 className="text-xl font-bold text-white flex items-center gap-3 mb-6">
+            <BarChart3 size={24} className="text-[#D4AF37]" />
+            Top Selling Products
+          </h2>
+          <div className="space-y-5">
+            {stats.topProducts.map((product, idx) => {
+              const maxRev = stats.topProducts[0].revenue;
+              const pct = (product.revenue / maxRev) * 100;
+              return (
+                <div key={product.name}>
+                  <div className="flex justify-between text-base mb-2">
+                    <span className="text-white font-semibold">
+                      <span className="text-[#D4AF37] mr-2">#{idx + 1}</span>
+                      {product.name}
+                    </span>
+                    <span className="text-gray-400 text-sm">{product.quantity} sold · ₹{product.revenue.toLocaleString()}</span>
+                  </div>
+                  <div className="h-3 bg-gray-900 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-[#8A6623] via-[#D4AF37] to-[#FFF2B2] rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Date Range Selector */}
-          <div className="flex bg-gray-800/60 border border-gray-700/50 rounded-2xl p-1 gap-1">
-            {DATE_RANGES.map(r => (
-              <button
-                key={r.value}
-                onClick={() => setDateRange(r.value)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  dateRange === r.value
-                    ? 'bg-[#D4AF37] text-black shadow'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                {r.label}
-              </button>
+
+        <div className="bg-gray-800/30 border border-gray-700/50 rounded-3xl p-7">
+          <h2 className="text-xl font-bold text-white flex items-center gap-3 mb-6">
+            <CreditCard size={24} className="text-[#D4AF37]" />
+            Payment Methods
+          </h2>
+          <div className="space-y-5">
+            {Object.entries(stats.paymentBreakdown).map(([method, amount]) => {
+              const pct = ((amount / totalPayments) * 100).toFixed(1);
+              const Icon = PAYMENT_ICONS[method];
+              return (
+                <div key={method} className="flex items-center gap-5">
+                  <div className={`p-3.5 rounded-xl ${PAYMENT_COLORS[method]}/20 shrink-0`}>
+                    <Icon size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between text-base mb-2">
+                      <span className="text-white font-semibold">{method}</span>
+                      <span className="text-gray-400">₹{amount.toLocaleString()} ({pct}%)</span>
+                    </div>
+                    <div className="h-3 bg-gray-900 rounded-full overflow-hidden">
+                      <div className={`h-full ${PAYMENT_COLORS[method]} rounded-full`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-7 pt-5 border-t border-gray-700/40 grid grid-cols-3 gap-4 text-center">
+            {Object.entries(stats.paymentBreakdown).map(([method, amount]) => (
+              <div key={method} className="bg-gray-900/60 rounded-xl p-4">
+                <p className="text-gray-500 text-xs uppercase font-bold">{method}</p>
+                <p className="text-white font-bold text-lg mt-1.5">₹{amount.toLocaleString()}</p>
+              </div>
             ))}
           </div>
-          <button
-            onClick={() => ApiService.exportReports('csv')}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-800/60 border border-gray-700/50 text-gray-300 hover:text-white text-xs font-bold rounded-xl transition-all cursor-pointer hover:border-gray-600"
-          >
-            <Download size={14} /> Export
-          </button>
         </div>
+      </div>
+
+      {stats.hourlySales?.length > 0 && (
+        <div className="bg-gray-800/30 border border-gray-700/50 rounded-3xl p-7">
+          <h2 className="text-xl font-bold text-white mb-7">Hourly Sales — Today</h2>
+          <div className="flex items-end gap-3 h-56">
+            {stats.hourlySales.map((h) => (
+              <div key={h.hour} className="flex-1 flex flex-col items-center gap-2">
+                <span className="text-xs text-gray-500 font-medium">₹{(h.amount / 1000).toFixed(1)}k</span>
+                <div
+                  className="w-full bg-gradient-to-t from-[#8A6623] via-[#D4AF37] to-[#FFF2B2] rounded-t-xl transition-all duration-700 hover:opacity-80"
+                  style={{ height: `${(h.amount / maxHourly) * 100}%`, minHeight: '12px' }}
+                />
+                <span className="text-xs text-gray-500 font-bold">{h.hour}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="bg-gray-800/30 border border-gray-700/50 rounded-3xl overflow-hidden">
+        <div className="px-7 py-5 border-b border-gray-700/40">
+          <h2 className="text-xl font-bold text-white">Performance Summary</h2>
+        </div>
+        <table className="w-full text-left text-base">
+          <thead>
+            <tr className="border-b border-gray-700/40 text-gray-400 font-bold uppercase text-xs tracking-wider bg-gray-800/50">
+              <th className="py-4 px-7">Metric</th>
+              <th className="py-4 px-5">Value</th>
+              <th className="py-4 px-5">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              { metric: 'Revenue Target', value: `₹${stats.totalRevenue.toLocaleString()} / ₹${(stats.totalRevenue * 1.2).toFixed(0)}`, status: 'On Track', color: 'text-emerald-400' },
+              { metric: 'Order Completion Rate', value: '94.2%', status: 'Good', color: 'text-emerald-400' },
+              { metric: 'Average Wait Time', value: '12 min', status: 'Normal', color: 'text-amber-400' },
+              { metric: 'Customer Satisfaction', value: '4.7 / 5.0', status: 'Excellent', color: 'text-emerald-400' },
+              { metric: 'Table Turnover', value: '2.3x / day', status: 'Good', color: 'text-emerald-400' },
+            ].map((row) => (
+              <tr key={row.metric} className="border-b border-gray-700/20 hover:bg-gray-800/30 transition-colors">
+                <td className="py-4 px-7 text-white font-medium">{row.metric}</td>
+                <td className="py-4 px-5 text-gray-300">{row.value}</td>
+                <td className={`py-4 px-5 font-bold ${row.color}`}>{row.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {errorMsg && (

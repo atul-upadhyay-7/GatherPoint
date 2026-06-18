@@ -18,7 +18,7 @@ public class AdminComponent implements CommandLineRunner {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${admin.emails:anshika1179@gmail.com}")
+    @Value("${admin.emails:satyamkumarsinghjaisidih@gmail.com}")
     private String adminEmailsRaw;
 
     @Value("${admin.password:admin123}")
@@ -42,6 +42,7 @@ public class AdminComponent implements CommandLineRunner {
                 adminUser.setPassword(passwordEncoder.encode(adminPassword));
                 adminUser.setRole(Role.ADMIN);
                 adminUser.setActive(true);
+                adminUser.setAllowOfflineSelling(true);
                 userRepo.save(adminUser);
             } else {
                 User user = existing.get();

@@ -569,6 +569,62 @@ class ApiService {
     return response.json();
   }
 
+  static async syncOfflineOrders(orders) {
+    const response = await fetch(`${API_BASE_URL}/orders/sync-offline`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orders),
+    });
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || 'Failed to sync offline orders');
+    }
+    return response.json();
+  }
+
+  static async payCash(orderId, amount, amountPaid = amount, change = 0) {
+    const response = await fetch(`${API_BASE_URL}/payments/cash`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, amount, amountPaid, change }),
+    });
+    if (!response.ok) throw new Error('Cash payment failed');
+    return response.json();
+  }
+
+  static async payCard(orderId, amount, transactionReference) {
+    const response = await fetch(`${API_BASE_URL}/payments/card`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, amount, transactionReference }),
+    });
+    if (!response.ok) throw new Error('Card payment failed');
+    return response.json();
+  }
+
+  static async payUpi(orderId, amount, transactionReference) {
+    const response = await fetch(`${API_BASE_URL}/payments/upi`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, amount, transactionReference }),
+    });
+    if (!response.ok) throw new Error('UPI payment failed');
+    return response.json();
+  }
+
+  static async toggleOfflineSelling(id, enabled) {
+    const response = await fetch(`${API_BASE_URL}/employees/${id}/offline-selling`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled }),
+    });
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || 'Failed to update offline selling');
+    }
+    return response.json();
+  }
+
   static async sendReceipt(orderId, email) {
     const response = await fetch(`${API_BASE_URL}/payments/${orderId}/email`, {
       method: 'POST',

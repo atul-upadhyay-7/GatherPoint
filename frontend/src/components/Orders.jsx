@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import ApiService from '../services/apiService';
 import { Calendar, User, DollarSign, Clock, Search, Eye, Mail, Printer, Check, X, ShieldAlert } from 'lucide-react';
+import { demoOrders } from '../data/demoData';
+import { DemoBadge } from './PageHeader';
 
 const GlassCard = ({ children, className = '' }) => (
   <div className={`bg-[#0A261C]/50 backdrop-blur-xl border border-[#D4A373]/15 rounded-2xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] ${className}`}>
@@ -24,16 +26,25 @@ export default function Orders() {
   const [emailInput, setEmailInput] = useState('');
   const [emailSuccess, setEmailSuccess] = useState('');
   const [emailLoading, setEmailLoading] = useState(false);
+  const [usingDemo, setUsingDemo] = useState(false);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
       setErrorMsg('');
       const data = await ApiService.getOrders();
-      setOrders(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      if (list.length === 0) {
+        setOrders(demoOrders);
+        setUsingDemo(true);
+      } else {
+        setOrders(list);
+        setUsingDemo(false);
+      }
     } catch (err) {
       console.error(err);
-      setErrorMsg('Failed to load orders history.');
+      setOrders(demoOrders);
+      setUsingDemo(true);
     } finally {
       setLoading(false);
     }
@@ -147,17 +158,15 @@ export default function Orders() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#FAF8F1] tracking-wide font-cinzel">
-            Orders <span className="text-[#D4A373]">History</span>
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#FFF2B2] via-[#D4AF37] to-[#8A6623]">
+            Orders History
           </h1>
-          <p className="text-gray-400 text-sm mt-1.5 font-sans">
-            Search past order receipts, verify payments, and reprint bills.
-          </p>
+          <p className="text-gray-400 text-base mt-2">Search past order receipts, verify payments, and reprint bills</p>
         </div>
+        {usingDemo && <DemoBadge />}
       </div>
 
       {errorMsg && (
@@ -168,12 +177,12 @@ export default function Orders() {
       )}
 
       {/* Filter Bar */}
-      <GlassCard className="flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="flex flex-col md:flex-row gap-5 justify-between items-center bg-gray-800/40 p-5 rounded-3xl border border-gray-700/40">
         <div className="relative w-full md:max-w-md">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
-            className="w-full bg-[#071B14]/40 border border-[#D4A373]/15 text-[#FAF8F1] pl-12 pr-4 py-3 rounded-xl focus:outline-none focus:border-[#D4A373] placeholder-gray-500 transition-colors text-sm"
+            className="w-full bg-gray-900 border border-gray-700 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#D4AF37] transition-all text-base"
             placeholder="Search by Order #, Table, Customer..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -185,7 +194,7 @@ export default function Orders() {
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-5 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                 statusFilter === st
                   ? 'bg-[#D4A373] text-[#071B14]'
                   : 'bg-white/5 border border-[#D4A373]/15 text-gray-400 hover:text-white hover:bg-white/10'
@@ -211,12 +220,12 @@ export default function Orders() {
       ) : (
         <GlassCard className="overflow-hidden !p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left text-base border-collapse">
               <thead>
-                <tr className="border-b border-[#D4A373]/15 bg-[#0A261C]/80 text-[#D4A373] text-xs font-bold uppercase tracking-widest">
-                  <th className="py-4 px-6">Order Number</th>
-                  <th className="py-4 px-4">Date & Time</th>
-                  <th className="py-4 px-4">Table</th>
+                <tr className="border-b border-gray-700/40 text-gray-400 font-bold uppercase text-xs tracking-wider bg-gray-800/50">
+                  <th className="py-4 px-7">Order Number</th>
+                  <th className="py-4 px-5">Date & Time</th>
+                  <th className="py-4 px-5">Table</th>
                   <th className="py-4 px-4">Customer</th>
                   <th className="py-4 px-4">Cashier</th>
                   <th className="py-4 px-4 text-right">Amount</th>
